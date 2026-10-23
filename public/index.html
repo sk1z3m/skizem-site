@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>skizem</title>
+  <meta name="description" content="Small web projects and study tools.">
+  <meta property="og:title" content="skizem">
+  <meta property="og:description" content="Small web projects and study tools.">
+  <meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#111418" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/site.css">
+</head>
+<body>
+  <main class="wrap">
+    <header class="hero">
+      <div class="mark" aria-hidden="true">s</div>
+      <h1>skizem</h1>
+      <p class="lede">Small web projects and study tools.</p>
+    </header>
+
+    <section aria-labelledby="projects">
+      <h2 id="projects">Projects</h2>
+
+      <a class="project" href="https://quiz.skizem.com">
+        <div class="project-top">
+          <h3>PN Practice</h3>
+          <span class="status live">Live</span>
+        </div>
+        <p>Practice tests and ranked quizzes for Practical Nursing students: pharmacology, maternal/child and community nursing, with rationales for every answer.</p>
+        <span class="go">quiz.skizem.com <span aria-hidden="true">→</span></span>
+      </a>
+
+      <div class="project soon" aria-disabled="true">
+        <div class="project-top">
+          <h3>Dark Galaxy</h3>
+          <span class="status">In development</span>
+        </div>
+        <p>A browser-based space 4X strategy game: explore, expand, exploit, exterminate.</p>
+      </div>
+    </section>
+
+    <footer>
+      <span>© <span id="yr">2026</span> skizem</span>
+    </footer>
+  </main>
+  <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
+</body>
+</html>
