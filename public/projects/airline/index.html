@@ -1,0 +1,714 @@
+<!doctype html><html><head><meta charset=utf8><meta name="robots" content="noindex"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Contrail Jet Age</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: sticky ops header + tab strip over an aeronautical-chart map; all detail work happens in a bottom sheet */
+:root{
+  --paper:#edf1f1; --card:#f9fbfb; --ink:#17253a; --muted:#566676; --rule:#cdd6da;
+  --water:#d4e3eb; --land:#e2e8dc; --coast:#a7b6a6; --grat:#b9cbd4;
+  --accent:#a92c72; --accent-ink:#ffffff; --accent-soft:#f3dceb;
+  --c1:#2c65a8; --c2:#a86a08; --c3:#008a6e;
+  --good:#257a4a; --bad:#b4372b; --chip:#17253a; --chip-ink:#eef3f5;
+  --display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0e1520; --card:#151f2d; --ink:#e2e9ef; --muted:#90a0ae; --rule:#273546;
+  --water:#0f1b28; --land:#1b2735; --coast:#34465a; --grat:#1f3042;
+  --accent:#e56aa9; --accent-ink:#1a0d16; --accent-soft:#3a1e30;
+  --c1:#5b93d8; --c2:#c48a2a; --c3:#2fab94;
+  --good:#5cc48a; --bad:#ee7a6c; --chip:#e2e9ef; --chip-ink:#0e1520; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0e1520; --card:#151f2d; --ink:#e2e9ef; --muted:#90a0ae; --rule:#273546;
+  --water:#0f1b28; --land:#1b2735; --coast:#34465a; --grat:#1f3042;
+  --accent:#e56aa9; --accent-ink:#1a0d16; --accent-soft:#3a1e30;
+  --c1:#5b93d8; --c2:#c48a2a; --c3:#2fab94;
+  --good:#5cc48a; --bad:#ee7a6c; --chip:#e2e9ef; --chip-ink:#0e1520; color-scheme:dark}
+html,body{background:var(--paper);color:var(--ink)}
+body{font-family:var(--body);font-size:15px;line-height:1.45}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+.wrap{max-width:980px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--paper);border-bottom:1px solid var(--rule)}
+.bar{display:flex;align-items:center;gap:12px;padding-block:10px 4px}
+.brand{font-family:var(--display);font-weight:700;font-size:23px;letter-spacing:.03em;text-transform:uppercase;line-height:1.05;min-width:0}
+.brand small{display:block;font-family:var(--body);font-size:12.5px;letter-spacing:0;text-transform:none;font-weight:500;color:var(--muted);margin-top:2px}
+.bar .btn{margin-left:auto;flex-shrink:0}
+.stats{display:flex;gap:18px;flex-wrap:wrap;padding-block:4px 6px}
+.stat{display:flex;flex-direction:column;min-width:0}
+.stat b{font-family:var(--mono);font-weight:500;font-size:14.5px;font-variant-numeric:tabular-nums}
+.stat span,.lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600}
+nav.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+nav.tabs button{font-family:var(--display);font-weight:600;font-size:17px;text-transform:uppercase;letter-spacing:.06em;padding:6px 12px 7px;border:0;background:none;color:var(--muted);border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+main{padding-block:16px 48px;display:flex;flex-direction:column;gap:14px}
+h2,h3{font-family:var(--display);text-transform:uppercase;letter-spacing:.05em;margin:0;text-wrap:balance;line-height:1.1}
+h2{font-size:26px;font-weight:700}
+h3{font-size:18px;font-weight:600}
+p{margin:0}
+.muted{color:var(--muted)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.pos{color:var(--good)} .neg{color:var(--bad)}
+.btn{font:600 14px/1 var(--body);padding:10px 14px;border-radius:7px;border:1px solid var(--rule);background:var(--card);color:var(--ink);cursor:pointer;min-height:40px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.sm{padding:7px 10px;min-height:32px;font-size:13px}
+.btn.danger{color:var(--bad);border-color:var(--bad);background:transparent}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.code{font-family:var(--mono);font-weight:500;font-size:12.5px;background:var(--chip);color:var(--chip-ink);padding:2px 5px 1px;border-radius:3px;letter-spacing:.06em;display:inline-block;line-height:1.3}
+.pair{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.pair i{font-style:normal;color:var(--muted);font-size:12px}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0}
+.goal{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px}
+.goal b{font-weight:600}
+.mapbox{border:1px solid var(--rule);border-radius:10px;overflow:auto;background:var(--water);-webkit-overflow-scrolling:touch}
+.mapbox svg{display:block;width:100%;height:auto}
+.mapbox.zoom svg{width:200%;max-width:none}
+.map text{font-family:var(--mono);pointer-events:none}
+.map .hit{cursor:pointer}
+.maptools{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.list{display:flex;flex-direction:column;border-top:1px solid var(--rule)}
+.row{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:10px 2px;border-bottom:1px solid var(--rule);background:none;border-left:0;border-right:0;border-top:0;color:inherit;font:inherit;text-align:left;cursor:pointer;width:100%}
+.row:hover{background:var(--card)}
+.row .mid{min-width:0}
+.row .mid div:first-child{font-weight:600}
+.row .sub{font-size:12.5px;color:var(--muted)}
+.row .end{text-align:right;font-size:13px}
+.owners{display:inline-flex;gap:3px;vertical-align:middle;margin-left:4px}
+.panel{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:14px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.kv{display:flex;flex-direction:column;gap:2px;min-width:0}
+.kv b{font-family:var(--mono);font-weight:500;font-size:16px;font-variant-numeric:tabular-nums}
+table{border-collapse:collapse;width:100%;font-size:14px}
+td,th{padding:7px 6px;border-bottom:1px solid var(--rule);text-align:left;white-space:nowrap}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600}
+td.r,th.r{text-align:right}
+.tscroll{overflow-x:auto}
+.lfbar{height:5px;border-radius:3px;background:var(--rule);overflow:hidden;width:64px;display:inline-block;vertical-align:middle}
+.lfbar i{display:block;height:100%;background:var(--accent)}
+.seg{display:flex;border:1px solid var(--rule);border-radius:8px;overflow:hidden}
+.seg button{flex:1;border:0;background:var(--card);color:var(--ink);font:500 13px var(--body);padding:9px 4px;cursor:pointer;border-right:1px solid var(--rule)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.plane{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.plane h4{margin:0;font-family:var(--display);font-size:19px;font-weight:600;letter-spacing:.03em;text-transform:uppercase}
+.spec{display:grid;grid-template-columns:repeat(2,1fr);gap:4px 10px;font-size:13px}
+.spec span{color:var(--muted)}
+.tag{font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:var(--accent-soft);color:var(--accent)}
+.slotbar{display:flex;height:10px;border-radius:3px;overflow:hidden;background:var(--rule);gap:1px}
+.slotbar i{display:block;height:100%}
+.empty{padding:22px;border:1px dashed var(--rule);border-radius:10px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.fctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.fgroup{display:flex;flex-direction:column;gap:8px}
+.fgroup h3{display:flex;gap:8px;align-items:baseline}
+.ptop{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.plane.soon{opacity:.65}
+.tag.muted-tag{background:var(--rule);color:var(--muted)}
+.tag.bad-tag{background:var(--bad);color:var(--card)}
+.cpanel{display:flex;flex-direction:column;gap:8px}
+.chartbox{position:relative}
+.chartbox svg{display:block;width:100%;height:auto;touch-action:pan-y}
+.tip{position:absolute;top:2px;pointer-events:none;background:var(--card);border:1px solid var(--rule);border-radius:7px;padding:6px 8px;font-size:12px;box-shadow:0 4px 14px rgb(0 0 0 / .15);white-space:nowrap;z-index:2;display:flex;flex-direction:column;gap:2px}
+.tip b{font-family:var(--mono);font-weight:500}
+details summary{cursor:pointer;font-size:13.5px;color:var(--muted);padding-block:4px}
+/* sheet */
+.scrim{position:fixed;inset:0;background:rgb(8 16 26 / .42);z-index:20}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;background:var(--card);border-top:1px solid var(--rule);border-radius:16px 16px 0 0;max-height:86vh;overflow-y:auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px calc(20px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 30px rgb(0 0 0 / .2);display:flex;flex-direction:column;gap:14px}
+@media (min-width:700px){.sheet{left:50%;right:auto;width:600px;transform:translateX(-50%)}}
+.grab{width:40px;height:4px;border-radius:2px;background:var(--rule);align-self:center}
+.shead{display:flex;align-items:flex-start;gap:10px}
+.shead .x{margin-left:auto}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+select,input[type=text]{font:500 15px var(--body);padding:9px 10px;border-radius:7px;border:1px solid var(--rule);background:var(--paper);color:var(--ink);width:100%;min-height:42px}
+.stepper{display:flex;align-items:center;gap:8px}
+.stepper button{width:40px;height:40px;border-radius:7px;border:1px solid var(--rule);background:var(--paper);color:var(--ink);font-size:20px;cursor:pointer}
+.stepper b{font-family:var(--mono);font-size:17px;min-width:76px;text-align:center;font-weight:500}
+.err{color:var(--bad);font-size:13.5px;font-weight:500}
+.forecast{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:12px;border-radius:10px;background:var(--paper)}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.actions .btn.primary{flex:1}
+.news{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.news li{display:grid;grid-template-columns:auto 1fr;gap:10px;font-size:14px;align-items:baseline}
+.news li .num{font-size:11.5px;color:var(--muted)}
+.big{font-family:var(--mono);font-size:30px;font-weight:500}
+/* setup */
+.hero{display:flex;flex-direction:column;gap:8px;padding-block:10px 4px}
+.hero h1{font-family:var(--display);font-size:clamp(40px,11vw,70px);line-height:.92;text-transform:uppercase;letter-spacing:.02em;margin:0;font-weight:700}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero p{max-width:60ch;color:var(--muted)}
+.hqgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.hq{display:flex;flex-direction:column;gap:3px;align-items:flex-start;padding:10px;border-radius:8px;border:1px solid var(--rule);background:var(--card);color:var(--ink);cursor:pointer;font:inherit;text-align:left}
+.hq[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.hq small{color:var(--muted);font-size:12px}
+.chart text{font-family:var(--mono);font-size:10px;fill:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.sheet{animation:up .22s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.6}}@media (min-width:700px){@keyframes up{from{transform:translate(-50%,24px);opacity:.6}}}}
+</style>
+
+<header class="top" id="hdr" hidden></header>
+<main class="wrap" id="app"></main>
+<div id="sheetRoot"></div>
+
+<script>
+/* ---------- data ---------- */
+const START=2000, END_T=84, UPK=0.015, RESALE=0.6;
+// code, name, lat, lon, market size (1-10), tourism (0-3), label anchor
+const CITY_DATA=[
+['YHZ','Halifax',44.65,-63.57,2,1],['YUL','Montreal',45.5,-73.57,5,1],['YOW','Ottawa',45.42,-75.7,3,0,'l'],
+['YYZ','Toronto',43.65,-79.38,7,0],['YWG','Winnipeg',49.9,-97.14,2,0],['YYC','Calgary',51.05,-114.07,4,1],
+['YVR','Vancouver',49.28,-123.12,5,2],['SEA','Seattle',47.6,-122.33,5,0],['SFO','San Francisco',37.77,-122.42,7,2],
+['LAX','Los Angeles',34.05,-118.24,9,2],['LAS','Las Vegas',36.17,-115.14,4,3],['PHX','Phoenix',33.45,-112.07,5,1],
+['DEN','Denver',39.74,-104.99,6,1],['DFW','Dallas',32.78,-96.8,7,0],['IAH','Houston',29.76,-95.37,6,0,'b'],
+['MSY','New Orleans',29.95,-90.07,3,2],['ORD','Chicago',41.88,-87.63,9,1],['MSP','Minneapolis',44.98,-93.27,5,0],
+['DTW','Detroit',42.33,-83.05,5,0],['STL','St. Louis',38.63,-90.2,3,0],['ATL','Atlanta',33.75,-84.39,7,0],
+['MIA','Miami',25.76,-80.19,6,3,'l'],['NYC','New York',40.71,-74.0,10,3],['BOS','Boston',42.36,-71.06,6,1],
+['WAS','Washington',38.9,-77.04,7,1,'l'],['PHL','Philadelphia',39.95,-75.17,5,0,'l'],['MEX','Mexico City',19.43,-99.13,8,1],
+['MTY','Monterrey',25.68,-100.31,4,0],['NAS','Nassau',25.05,-77.35,1,3],['SJU','San Juan',18.47,-66.1,3,3,'l']];
+const CITIES=CITY_DATA.map(([id,name,lat,lon,size,tour,anc])=>({id,name,lat,lon,size,tour,anc:anc||'r'}));
+const CI=Object.fromEntries(CITIES.map(c=>[c.id,c]));
+const CTRY={YHZ:'CA',YUL:'CA',YOW:'CA',YYZ:'CA',YWG:'CA',YYC:'CA',YVR:'CA',MEX:'MX',MTY:'MX',NAS:'BS'};
+const ctry=c=>CTRY[c]||'US';
+const NATION={CA:['Canada','Canadian'],US:['the United States','American'],MX:['Mexico','Mexican'],BS:['the Bahamas','Bahamian']};
+const PLANES=[
+ {id:'crj2',name:'Bombardier CRJ200',kind:'Regional jet',from:1992,to:2006,seats:50,range:3000,speed:810,price:14,cpk:3.4},
+ {id:'q400',name:'Bombardier Q400',kind:'Turboprop',from:2000,to:2020,seats:74,range:2000,speed:660,price:17,cpk:3.1},
+ {id:'e175',name:'Embraer E175',kind:'Regional jet',from:2004,to:2020,seats:78,range:3700,speed:830,price:26,cpk:4.2},
+ {id:'a320',name:'Airbus A320',kind:'Narrowbody',from:1988,to:2020,seats:150,range:6100,speed:830,price:45,cpk:7.3},
+ {id:'b738',name:'Boeing 737-800',kind:'Narrowbody',from:1998,to:2020,seats:162,range:5400,speed:840,price:48,cpk:7.6},
+ {id:'b752',name:'Boeing 757-200',kind:'Narrowbody',from:1983,to:2004,seats:200,range:7200,speed:850,price:50,cpk:9.8},
+ {id:'b763',name:'Boeing 767-300ER',kind:'Widebody',from:1988,to:2014,seats:218,range:11000,speed:850,price:75,cpk:11.8},
+ {id:'a333',name:'Airbus A330-300',kind:'Widebody',from:1994,to:2020,seats:277,range:11700,speed:870,price:105,cpk:13.5},
+ {id:'b744',name:'Boeing 747-400',kind:'Jumbo jet',from:1989,to:2009,seats:416,range:13400,speed:910,price:140,cpk:21},
+ {id:'b77w',name:'Boeing 777-300ER',kind:'Widebody',from:2004,to:2020,seats:365,range:13600,speed:900,price:160,cpk:16.5},
+ {id:'a388',name:'Airbus A380',kind:'Superjumbo',from:2007,to:2020,seats:525,range:15000,speed:900,price:230,cpk:25},
+ {id:'b788',name:'Boeing 787-8',kind:'Widebody',from:2011,to:2020,seats:242,range:13600,speed:900,price:120,cpk:10.5},
+ {id:'a223',name:'Airbus A220-300',kind:'Narrowbody',from:2016,to:2020,seats:135,range:6200,speed:830,price:45,cpk:5.6},
+ {id:'a21n',name:'Airbus A321neo',kind:'Narrowbody',from:2017,to:2020,seats:190,range:7400,speed:830,price:60,cpk:7.4},
+ {id:'b38m',name:'Boeing 737 MAX 8',kind:'Narrowbody',from:2017,to:2020,seats:172,range:6500,speed:840,price:55,cpk:6.9,ground:[77,83]}];
+const PI=Object.fromEntries(PLANES.map(p=>[p.id,p]));
+const EVENTS=[
+ {from:7,to:7,title:'September 11 attacks',text:'Air travel collapses. Demand is down 35% this quarter and recovers slowly through 2002.',global:0.65},
+ {from:8,to:9,global:0.8,quiet:1},{from:10,to:11,global:0.9,quiet:1},
+ {from:13,to:13,title:'SARS outbreak in Toronto',text:'Demand to Toronto is down 30% this quarter.',city:'YYZ',mult:0.7},
+ {from:20,to:59,title:'Oil prices climb',text:'Flight costs are up 25% until oil prices fall.',fuel:1.25},
+ {from:22,to:25,title:'Hurricane Katrina',text:'New Orleans is devastated. Demand there is down 60% for a year.',city:'MSY',mult:0.4},
+ {from:33,to:34,title:'Fuel price spike',text:'Oil hits record highs. Flight costs jump another 50% for two quarters.',fuel:1.5},
+ {from:35,to:39,title:'Great Recession',text:'Travel demand is down 10% through 2009.',global:0.9},
+ {from:37,to:37,title:'H1N1 flu outbreak in Mexico',text:'Demand to Mexico City is down 30% this quarter.',city:'MEX',mult:0.7},
+ {from:40,to:40,title:'Winter Olympics in Vancouver',text:'Demand to Vancouver is up 40% this quarter.',city:'YVR',mult:1.4},
+ {from:60,to:67,title:'Oil prices crash',text:'Flight costs are down 20% through 2016.',fuel:0.8},
+ {from:77,to:83,title:'Boeing 737 MAX grounded',text:'Every 737 MAX is grounded. Routes flown by them carry no passengers until the ban lifts.'},
+ {from:80,to:80,title:'COVID-19 spreads',text:'Travel demand is down 15% this quarter.',global:0.85},
+ {from:81,to:81,title:'Pandemic lockdowns',text:'Borders close and travel nearly stops. Demand is down 85%.',global:0.15},
+ {from:82,to:83,global:0.35,quiet:1}];
+const SEASON=[0.92,1.0,1.12,0.96];
+const AD=[0,1.5,4,9], AD_NAMES=['None','Low','Medium','High'];
+const COLORS=['var(--accent)','var(--c1)','var(--c2)','var(--c3)'];
+const HQ_CHOICES=[['NYC','Biggest market, most rivals'],['ORD','Central hub'],['LAX','West coast gateway'],['YYZ','Canada’s largest city'],['YUL','Gateway to Quebec'],['ATL','World’s busiest airport'],['DFW','Texas base'],['YHZ','Small market, hard start']];
+const RIVAL_HQ=['NYC','ORD','LAX','ATL','YYZ','DFW'];
+const RIVALS=[{name:'Northstar Airways',fp:100,expand:2},{name:'Sunbelt Airlines',fp:92,expand:2},{name:'Meridian Air',fp:108,expand:1}];
+
+/* ---------- helpers ---------- */
+const DEG=Math.PI/180, DC={};
+const pairKey=(a,b)=>a<b?a+'-'+b:b+'-'+a;
+function km(a,b){const k=pairKey(a,b);if(DC[k])return DC[k];const A=CI[a],B=CI[b],p1=A.lat*DEG,p2=B.lat*DEG,dp=p2-p1,dl=(B.lon-A.lon)*DEG;const h=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;return DC[k]=Math.round(2*6371*Math.asin(Math.sqrt(h)));}
+const refFare=d=>60+0.1*d;
+const yearOf=t=>START+Math.floor(t/4);
+const qLabel=t=>`${yearOf(t)} · Q${t%4+1}`;
+const fmtKm=d=>d.toLocaleString('en-US')+' km';
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function money(x){const s=x<0?'−':'';x=Math.abs(x);return s+(x>=999.5?'$'+(x/1000).toFixed(2)+'B':x>=0.995?'$'+x.toFixed(x>=100?0:1)+'M':'$'+Math.round(x*1000)+'K');}
+const sgn=x=>(x>=0?'+':'')+money(x);
+const cls=x=>x>=0?'pos':'neg';
+function globalMult(t){let m=1;for(const e of EVENTS)if(t>=e.from&&t<=e.to&&e.global)m*=e.global;return m;}
+function cityMult(t,c){let m=1;for(const e of EVENTS)if(t>=e.from&&t<=e.to&&e.city===c)m*=e.mult;return m;}
+function fuelMult(t){let m=1;for(const e of EVENTS)if(t>=e.from&&t<=e.to&&e.fuel)m*=e.fuel;return m;}
+function baseDemand(a,b,t){const A=CI[a],B=CI[b],d=km(a,b);let D=24*A.size*B.size*(1+0.2*(A.tour+B.tour))/Math.sqrt(Math.max(d,300)/1000);D*=Math.min(1,d/450);return D*Math.pow(1.03,t/4)*SEASON[t%4]*globalMult(t)*cityMult(t,a)*cityMult(t,b);}
+const spF=P=>Math.min(1.3,Math.pow(P.speed/850,0.4));
+const newF=P=>1+(P.from-1985)*0.006;
+const grounded=(P,t)=>!!P.ground&&t>=P.ground[0]&&t<=P.ground[1];
+const officeFee=c=>3+0.5*CI[c].size;
+const isGate=(al,c)=>c===al.hq||(al.hubs||[]).includes(c);
+const gates=al=>[al.hq,...(al.hubs||[])];
+const maxHubs=t=>Math.floor(t/12);
+const hubCost=c=>20+5*CI[c].size;
+function routeRule(al,a,b){const ca=ctry(a),cb=ctry(b),h=al.home,[hn,ha]=NATION[h];
+  if(ca!==h&&cb!==h)return ca===cb?`Cabotage: a ${ha} airline can't fly domestic routes inside ${NATION[ca][0]}.`:`Traffic rights: a ${ha} airline's routes must start or end in ${hn}.`;
+  if(!isGate(al,a)&&!isGate(al,b))return `Routes must start at your HQ${(al.hubs||[]).length?' or a hub':''}. Neither ${CI[a].name} nor ${CI[b].name} is one.`;
+  return null;}
+function hubMsg(al){const m=maxHubs(G.t),nx=(Math.floor(G.t/12)+1)*12;return `Hubs: ${al.hubs.length} of ${m} unlocked${nx<END_T?`, next unlocks ${qLabel(nx)}`:''}.`+(al.hubs.length<m?` Open one from a city card in ${NATION[al.home][0]}.`:'');}
+function openHub(al,c){const cost=hubCost(c)+(al.slots[c]>0?0:officeFee(c));al.cash-=cost;al.hubs.push(c);al.slots[c]=(al.slots[c]||0)+Math.min(8,cityFree(c));}
+function migrate(g){if(g)g.airlines.forEach(al=>{al.home=al.home||ctry(al.hq);al.hubs=al.hubs||[];al.fin=al.fin||[];});return g;}
+const maxTrips=(P,d)=>Math.max(1,Math.floor(70/(2*(d/P.speed+0.75))));
+const available=(P,t)=>{const y=yearOf(t);return y>=P.from&&y<=P.to;};
+const cityCap=c=>6+CI[c].size*6;
+const cityTaken=c=>G.airlines.reduce((s,al)=>s+(al.slots[c]||0),0);
+const cityFree=c=>cityCap(c)-cityTaken(c);
+const slotPrice=c=>0.12*CI[c].size*(1+G.t/80);
+function usedSlots(al,c){let n=0;for(const r of al.routes)if(r.a===c||r.b===c)n+=r.freq;return n;}
+function inUse(al,p){let n=0;for(const r of al.routes)if(r.plane===p)n+=r.planes;return n;}
+const idle=(al,p)=>(al.fleet[p]||0)-inUse(al,p);
+function assets(al){let v=0;for(const p in al.fleet)v+=al.fleet[p]*PI[p].price*RESALE;for(const c in al.slots)v+=al.slots[c]*slotPrice(c)*0.8;return v;}
+const value=al=>al.cash-al.debt+assets(al);
+const maxDebt=al=>150+0.4*assets(al);
+const P0=()=>G.airlines[0];
+function ranking(){return G.airlines.map((al,i)=>({al,i,v:al.out?-1e9:value(al)})).sort((x,y)=>y.v-x.v);}
+const rankOf=al=>ranking().findIndex(x=>x.al===al)+1;
+
+/* ---------- market simulation ---------- */
+function entriesFor(a,b,excl){const k=pairKey(a,b),out=[];G.airlines.forEach((al,i)=>{if(al.out)return;for(const r of al.routes)if(r.id!==excl&&pairKey(r.a,r.b)===k)out.push({al,i,r});});return out;}
+function simMarket(a,b,t,ents){
+  const d=km(a,b),r=refFare(d),D0=baseDemand(a,b,t),n=ents.length,att=[],cap=[],fare=[];let sA=0,sAF=0;
+  ents.forEach((e,i)=>{const P=PI[e.plane],g=grounded(P,t);fare[i]=r*e.fp/100;cap[i]=g?0:e.freq*P.seats;att[i]=g?0:Math.pow(100/e.fp,2.2)*spF(P)*newF(P)*(e.al.rep||1)*Math.sqrt(e.freq);sA+=att[i];sAF+=att[i]*fare[i];});
+  const D=sA?D0*Math.pow(r/(sAF/sA),1.1):0, pax=new Array(n).fill(0);let spill=0;
+  for(let i=0;i<n&&sA;i++){const want=D*att[i]/sA;pax[i]=Math.min(cap[i],want);spill+=Math.max(0,want-cap[i]);}
+  spill*=0.6;let sS=0;for(let i=0;i<n;i++)if(pax[i]<cap[i])sS+=att[i];
+  if(spill>0&&sS>0)for(let i=0;i<n;i++)if(pax[i]<cap[i])pax[i]=Math.min(cap[i],pax[i]+spill*att[i]/sS);
+  return ents.map((e,i)=>({pax:pax[i],cap:cap[i],fare:fare[i],d,D}));
+}
+function econ(P,freq,planes,m,t){const rev=m.pax*2*m.fare*13/1e6,op=grounded(P,t)?0:freq*2*13*P.cpk*m.d*fuelMult(t)/1e6,up=planes*P.price*UPK;return{pax:m.pax,cap:m.cap,lf:m.cap?m.pax/m.cap:0,rev,op,up,profit:rev-op-up,fare:m.fare,demand:m.D};}
+function estimate(al,inp,plan){const ents=entriesFor(inp.a,inp.b,inp.routeId).map(x=>({al:x.al,plane:x.r.plane,freq:x.r.freq,fp:x.r.fp}));ents.push({al,plane:inp.plane,freq:inp.freq,fp:inp.fp});const res=simMarket(inp.a,inp.b,G.t,ents);return econ(PI[inp.plane],inp.freq,plan.need,res[res.length-1],G.t);}
+
+/* ---------- actions on an airline ---------- */
+function planRoute(al,inp){
+  const {a,b,plane,freq,routeId}=inp,P=PI[plane],ex=routeId?al.routes.find(r=>r.id===routeId):null;
+  const out={d:a&&b?km(a,b):0,need:0,useIdle:0,buyPlanes:0,buyA:0,buyB:0,office:[],cost:0,trips:0,err:null};
+  if(!P){out.err='No aircraft can fly this distance yet.';return out;}
+  if(a===b){out.err='Pick two different cities.';return out;}
+  if(out.d>P.range){out.err=`${P.name} can't fly ${fmtKm(out.d)}. Its range is ${fmtKm(P.range)}.`;return out;}
+  if(!ex&&al.routes.some(r=>pairKey(r.a,r.b)===pairKey(a,b))){out.err='You already fly this route. Edit it from the Routes tab.';return out;}
+  if(!ex){const rr=routeRule(al,a,b);if(rr){out.err=rr;return out;}}
+  if(!ex){const hA=(al.slots[a]||0)>0,hB=(al.slots[b]||0)>0;if(!hA&&!hB){out.err='One end must be a city where you already have an office.';return out;}if(!hA)out.office.push(a);if(!hB)out.office.push(b);}
+  out.trips=maxTrips(P,out.d);out.need=Math.ceil(freq/out.trips);
+  const idleN=idle(al,plane)+(ex&&ex.plane===plane?ex.planes:0);
+  out.buyPlanes=Math.max(0,out.need-idleN);out.useIdle=out.need-out.buyPlanes;
+  const back=ex?ex.freq:0,fa=(al.slots[a]||0)-usedSlots(al,a)+back,fb=(al.slots[b]||0)-usedSlots(al,b)+back;
+  out.buyA=Math.max(0,freq-fa);out.buyB=Math.max(0,freq-fb);
+  out.cost=out.buyPlanes*P.price+out.buyA*slotPrice(a)+out.buyB*slotPrice(b)+out.office.reduce((x,c)=>x+officeFee(c),0);
+  if(out.buyPlanes>0&&!available(P,G.t))out.err=`${P.name} is out of production. You can only use ones you already own.`;
+  else if(out.buyA>cityFree(a))out.err=`${CI[a].name} has only ${cityFree(a)} free slots. Lower the weekly flights.`;
+  else if(out.buyB>cityFree(b))out.err=`${CI[b].name} has only ${cityFree(b)} free slots. Lower the weekly flights.`;
+  else if(out.office.some(c=>cityFree(c)<1))out.err=`${CI[out.office[0]].name} has no free slots for a new office.`;
+  else if(out.cost>al.cash+1e-9)out.err=`This needs ${money(out.cost)} up front. You have ${money(al.cash)}. Borrow on the Money tab or lower the flights.`;
+  return out;
+}
+function applyPlan(al,inp,p){
+  al.cash-=p.cost;
+  if(p.buyPlanes)al.fleet[inp.plane]=(al.fleet[inp.plane]||0)+p.buyPlanes;
+  al.slots[inp.a]=(al.slots[inp.a]||0)+p.buyA;al.slots[inp.b]=(al.slots[inp.b]||0)+p.buyB;
+  const r=inp.routeId&&al.routes.find(x=>x.id===inp.routeId);
+  if(r)Object.assign(r,{plane:inp.plane,planes:p.need,freq:inp.freq,fp:inp.fp});
+  else al.routes.push({id:'r'+(G.uid++),a:inp.a,b:inp.b,plane:inp.plane,planes:p.need,freq:inp.freq,fp:inp.fp,stats:null,loss:0});
+}
+const closeRoute=(al,id)=>{al.routes=al.routes.filter(r=>r.id!==id);};
+
+/* ---------- rivals ---------- */
+function aiBest(al){
+  const flown=new Set(al.routes.map(r=>pairKey(r.a,r.b))),avail=PLANES.filter(P=>available(P,G.t)&&!grounded(P,G.t));let best=null;
+  for(const o of CITIES){if(!isGate(al,o.id))continue;
+    for(const c of CITIES){if(c.id===o.id||flown.has(pairKey(o.id,c.id)))continue;const d=km(o.id,c.id);
+      const D=baseDemand(o.id,c.id,G.t)/(entriesFor(o.id,c.id,null).length+1);if(D<120)continue;
+      for(const P of avail){if(P.range<d)continue;
+        const inp={a:o.id,b:c.id,plane:P.id,freq:clamp(Math.round(D/(P.seats*0.85)),1,21),fp:al.fp};
+        const plan=planRoute(al,inp);if(plan.err||plan.cost>al.cash-10)continue;
+        const est=estimate(al,inp,plan),score=est.profit/(plan.cost+30)*(0.9+Math.random()*0.2);
+        if(est.profit>0.6&&(!best||score>best.score))best={score,inp,plan};}}}
+  return best;
+}
+function aiTurn(al){
+  for(const r of al.routes)r.fp=al.fp;
+  for(const r of [...al.routes]){if(r.loss>=2){if(r.freq>2){const inp={routeId:r.id,a:r.a,b:r.b,plane:r.plane,freq:Math.max(1,Math.floor(r.freq*0.6)),fp:r.fp},p=planRoute(al,inp);if(!p.err)applyPlan(al,inp,p);r.loss=0;}else closeRoute(al,r.id);}}
+  for(const P of PLANES){let n=idle(al,P.id);while(n-->0){al.fleet[P.id]--;al.cash+=P.price*RESALE;}}
+  for(const r of al.routes){if(r.stats&&r.stats.lf>0.9&&r.stats.profit>0&&r.freq<28){const inp={routeId:r.id,a:r.a,b:r.b,plane:r.plane,freq:Math.min(28,r.freq+2),fp:r.fp},p=planRoute(al,inp);if(!p.err&&p.cost<al.cash-20)applyPlan(al,inp,p);}}
+  if(al.cash<40&&al.debt+50<=maxDebt(al)*0.6){al.debt+=50;al.cash+=50;}
+  if(al.hubs.length<maxHubs(G.t)){const c=CITIES.filter(x=>ctry(x.id)===al.home&&!isGate(al,x.id)&&cityFree(x.id)>=4).sort((p,q)=>q.size-p.size)[0];if(c&&al.cash>hubCost(c.id)+(al.slots[c.id]>0?0:officeFee(c.id))+60){openHub(al,c.id);addNews(`${al.name} opens a hub in ${c.name}.`,'rival');}}
+  for(let k=0;k<al.expand;k++){if(al.cash<20)break;const best=aiBest(al);if(!best)break;applyPlan(al,best.inp,best.plan);addNews(`${al.name} opens ${best.inp.a}–${best.inp.b}.`,'rival');}
+  al.ad=al.cash>150?2:1;
+  if(al.cash>300&&al.debt>0){const x=Math.min(al.debt,al.cash-200);al.debt-=x;al.cash-=x;}
+}
+
+/* ---------- game flow ---------- */
+let G=null;
+function startCities(hq){
+  const pool=CITIES.filter(c=>c.id!==hq).map(c=>({id:c.id,d:km(hq,c.id)})),used=new Set();
+  const pick=(list,n)=>{const a=list.filter(x=>!used.has(x.id)),out=[];while(out.length<n&&a.length){const x=a.splice(Math.floor(Math.random()*a.length),1)[0];out.push(x.id);used.add(x.id);}return out;};
+  const st={short:pick(pool.filter(x=>x.d<1000),2),med:pick(pool.filter(x=>x.d>=1000&&x.d<2500),1),long:pick(pool.filter(x=>x.d>=2500),2)};
+  const want={short:2,med:1,long:2},near={short:x=>x.d,med:x=>Math.abs(x.d-1750),long:x=>-x.d};
+  for(const k in want)while(st[k].length<want[k]){const x=pool.filter(y=>!used.has(y.id)).sort((p,q)=>near[k](p)-near[k](q))[0];st[k].push(x.id);used.add(x.id);}
+  return st;
+}
+function mkAl(name,hq,ai,pers){return{name,hq,ai,fp:pers?pers.fp:100,expand:pers?pers.expand:0,cash:250,debt:0,slots:{},start:startCities(hq),home:ctry(hq),hubs:[],fin:[],fleet:{},routes:[],ad:1,rep:1,last:null,hist:[],out:false};}
+function newGame(name,hq){
+  const big=CITIES.filter(c=>c.size>=6&&c.id!==hq).map(c=>c.id),rh=[];
+  while(rh.length<3)rh.push(big.splice(Math.floor(Math.random()*big.length),1)[0]);
+  G={t:0,uid:1,over:false,lost:false,news:[],log:[],airlines:[mkAl(name,hq,false),...rh.map((c,i)=>mkAl(RIVALS[i].name,c,true,RIVALS[i]))]};
+  for(const al of G.airlines)al.slots[al.hq]=12;
+  for(const al of G.airlines)for(const c of [...al.start.short,...al.start.med,...al.start.long]){const n=Math.min(4,cityFree(c));if(n>0)al.slots[c]=(al.slots[c]||0)+n;}
+  G.airlines.forEach(al=>al.hist.push(value(al)));
+  const st=G.airlines[0].start,nm=l=>l.map(c=>CI[c].name).join(' and ');
+  addNews(`${name} is founded in ${CI[hq].name} with $250M. Starting offices: ${nm(st.short)} (short-haul), ${nm(st.med)} (medium), ${nm(st.long)} (long-haul).`,'you');
+}
+function addNews(text,kind){const n={t:G.t,text,kind};G.news.push(n);G.log.unshift(n);if(G.log.length>80)G.log.length=80;}
+function endQuarter(){
+  const t=G.t;G.news=[];
+  for(const al of G.airlines)if(al.ai&&!al.out)aiTurn(al);
+  const markets={};
+  for(const al of G.airlines){if(al.out)continue;for(const r of al.routes){const k=pairKey(r.a,r.b);(markets[k]||(markets[k]=[])).push({al,r});}}
+  for(const k in markets){const list=markets[k],[a,b]=k.split('-'),res=simMarket(a,b,t,list.map(x=>({al:x.al,plane:x.r.plane,freq:x.r.freq,fp:x.r.fp})));
+    list.forEach((x,j)=>{const e=econ(PI[x.r.plane],x.r.freq,x.r.planes,res[j],t);x.r.stats={pax:Math.round(e.pax),lf:e.lf,rev:e.rev,op:e.op,up:e.up,profit:e.profit,fare:e.fare};x.r.loss=e.profit<0?(x.r.loss||0)+1:0;});}
+  for(const al of G.airlines){if(al.out){al.hist.push(0);continue;}
+    let rev=0,op=0,pax=0,up=0,slot=0,newSum=0,newN=0;
+    for(const r of al.routes){rev+=r.stats.rev;op+=r.stats.op;pax+=r.stats.pax*26;newSum+=(PI[r.plane].from-1955)*r.planes;newN+=r.planes;}
+    for(const p in al.fleet)up+=al.fleet[p]*PI[p].price*UPK;
+    for(const c in al.slots)slot+=al.slots[c]*0.012*CI[c].size;
+    const over=1.5+0.15*al.routes.length,ads=AD[al.ad],int=al.debt*0.015,net=rev-op-up-slot-over-ads-int;
+    al.cash+=net;al.last={rev,op,up,slot,over,ads,int,net,pax};
+    const target=0.85+0.08*al.ad+0.1*(newN?newSum/newN/30:0);al.rep+=(target-al.rep)*0.3;
+    if(al.cash<0){const need=Math.ceil(-al.cash);
+      if(al.debt+need<=maxDebt(al)){al.debt+=need;al.cash+=need;if(!al.ai)addNews(`The bank covered your ${money(need)} shortfall with an automatic loan.`,'you');}
+      else{al.out=true;if(al.ai){addNews(`${al.name} goes bankrupt. Its slots return to the airports.`,'rival');al.routes=[];al.slots={};al.fleet={};}else{G.over=true;G.lost=true;}}}
+    if(!al.out)(al.fin||(al.fin=[])).push({t,rev,cost:rev-net,net,cash:al.cash,debt:al.debt,pax});al.hist.push(al.out?0:value(al));}
+  G.t++;
+  if(G.t%12===0&&G.t<END_T)addNews(`Hub rights expand: airlines may now run ${maxHubs(G.t)} hub${maxHubs(G.t)>1?'s':''} besides their HQ.`,'you');
+  for(const e of EVENTS)if(e.from===G.t&&!e.quiet)addNews(`${e.title}. ${e.text}`,'event');
+  for(const e of EVENTS)if(e.to===G.t-1&&!e.quiet&&e.to<END_T-1)addNews(`${e.title} is over.`,'event');
+  if(G.t%4===0)for(const P of PLANES){if(P.from===yearOf(G.t))addNews(`The ${P.name} (${P.kind.toLowerCase()}, ${P.seats} seats) is now for sale.`,'plane');if(P.to===yearOf(G.t)-1)addNews(`The ${P.name} goes out of production.`,'plane');}
+  if(G.t>=END_T)G.over=true;
+}
+
+/* ---------- map geometry ---------- */
+const W=527,H=390,LON0=-126,LAT0=56,KX=7.986,KY=10;
+const proj=(lon,lat)=>[(lon-LON0)*KX,(LAT0-lat)*KY];
+const LAND=[
+[[-131,57],[-130,56],[-128,52.5],[-125.5,50.3],[-124.6,48.4],[-124,46.3],[-124.1,43.5],[-124.3,40.4],[-123.7,39],[-122.5,37.8],[-121.9,36.6],[-120.6,34.6],[-118.5,34],[-117.2,32.7],[-116.3,30.5],[-115,28.8],[-114,27.6],[-112.2,25.5],[-111,24.2],[-110,23],[-110.3,24.2],[-111.4,25.9],[-112.7,28],[-113.5,29.8],[-114.7,31.6],[-113,31.3],[-112.2,29.3],[-110.8,27.9],[-109.3,25.6],[-108,24.8],[-105.7,22.5],[-105.3,20.4],[-103.5,18.3],[-101,17.2],[-99.5,16.6],[-96.5,15.7],[-94.5,16.1],[-92.5,14.6],[-91,13.5],[-87,13],[-84,15],[-84.5,15.9],[-88,15.8],[-88.3,18.5],[-87.5,19.8],[-86.8,21.4],[-88,21.5],[-90.4,21.2],[-90.7,19.5],[-91.9,18.6],[-94.5,18.2],[-96,19.2],[-97.3,21.3],[-97.7,24],[-97.2,27.6],[-94.8,29.4],[-93.5,29.8],[-91.5,29.4],[-89.4,29],[-89.5,30.2],[-88,30.4],[-86.5,30.4],[-85,29.6],[-83.7,29.9],[-82.7,28],[-81.8,26],[-81,25.2],[-80.4,25.2],[-80,26.7],[-80.6,28.5],[-81.4,30.7],[-80.9,32],[-79,33.4],[-77.9,34],[-76,35],[-75.5,35.3],[-76,37],[-75.6,38],[-74.9,38.9],[-74,40.5],[-72,41],[-70.5,41.6],[-70,41.8],[-70.6,42.6],[-70.2,43.7],[-67,44.8],[-66.2,45.2],[-64.5,45.3],[-66.1,44.1],[-65.5,43.5],[-63.5,44.5],[-61,45.3],[-60,46.1],[-61.5,45.8],[-64,46],[-64.5,46.2],[-64.8,47.8],[-64.2,48.9],[-66.5,49.1],[-69.5,47.6],[-70.6,47.1],[-70.4,47.4],[-69,48.4],[-66,50.1],[-61,50.2],[-57.2,51.4],[-56,52.5],[-57.5,54.5],[-60.5,55.8],[-61.5,57]],
+[[-59.4,47.6],[-56,47.6],[-53.5,46.7],[-52.6,47.6],[-53.5,49.3],[-55.5,51.6],[-57.5,50.6],[-59.4,48.4]],
+[[-128.4,50.8],[-127,50.1],[-125.5,48.9],[-123.4,48.3],[-124.6,49.3],[-125.8,50.3],[-127.5,51]],
+[[-85,21.9],[-84,22.7],[-82,23.1],[-80,23.1],[-77.5,21.8],[-75.5,20.7],[-74.1,20.2],[-75,19.9],[-77.7,19.8],[-78.5,21.3],[-81,21.8],[-84,21.9]],
+[[-74.4,18.4],[-73,19.9],[-71,19.9],[-69,19.1],[-68.3,18.6],[-70,18.2],[-71.5,17.7],[-72.8,18.1]],
+[[-67.3,18.5],[-65.6,18.4],[-65.7,18],[-67.2,18]],
+[[-78.3,18.4],[-76.3,18.2],[-76.8,17.9],[-77.9,18.1]]];
+const WATER=[
+[[-95,57.5],[-92.4,56.9],[-88.8,56.5],[-85,55.3],[-82.3,55.1],[-82.2,53],[-80.6,51.3],[-79,51.6],[-78.8,54.2],[-77,55.6],[-76.5,57.5]],
+[[-92.1,46.7],[-89.5,48],[-88.3,48.8],[-86,48.7],[-84.8,47],[-84.6,46.5],[-86.5,46.4],[-88,46.9],[-90.4,46.6]],
+[[-87.5,41.65],[-87,41.65],[-86.3,42.5],[-86.2,44],[-85.6,45.2],[-84.8,45.8],[-86,45.9],[-87.6,44.8],[-87.85,43.3],[-87.6,42.2]],
+[[-84.6,45.9],[-82.5,45.3],[-81.3,45.2],[-80.2,44.6],[-81.7,43.3],[-82.4,43],[-82.8,44],[-83.4,44.5],[-83.5,45.5]],
+[[-83.4,41.7],[-81.7,41.5],[-79.8,42.2],[-78.9,42.9],[-80.5,42.6],[-82.5,42]],
+[[-79.8,43.3],[-78.5,43.4],[-76.3,43.5],[-76.2,44.2],[-77.5,44],[-79.4,43.6]]];
+const BAHAMAS=[[-77.4,25.05],[-77.8,24.3],[-76.2,24.6],[-77.4,26.6],[-75.7,23.5],[-78.5,26.6]];
+const polyD=list=>list.map(pg=>'M'+pg.map(([lo,la])=>proj(lo,la).map(v=>v.toFixed(1)).join(' ')).join('L')+'Z').join('');
+const LAND_D=polyD(LAND),WATER_D=polyD(WATER);
+
+/* ---------- UI ---------- */
+let UI={tab:'map',zoom:typeof window!=='undefined'&&window.innerWidth<620,mapScroll:null,setupHQ:'NYC',confirmNew:false};
+let RB=null,SHEET=null;
+const $=s=>document.querySelector(s);
+const code=c=>`<span class="code">${c}</span>`;
+const pairHTML=(a,b)=>`<span class="pair">${code(a)}<i>⇄</i>${code(b)}</span>`;
+const dotOf=i=>`<span class="dot" style="background:${COLORS[i]}"></span>`;
+
+function save(){try{localStorage.setItem('contrail-save-v2',JSON.stringify(G));}catch(e){}}
+function loadSave(){try{const s=localStorage.getItem('contrail-save-v2');return s?JSON.parse(s):null;}catch(e){return null;}}
+
+function render(){
+  const mb=$('.mapbox');if(mb)UI.mapScroll=mb.scrollLeft;
+  if(!G){$('#hdr').hidden=true;$('#app').innerHTML=setupHTML();return;}
+  renderHeader();
+  const tabs={map:tabMap,routes:tabRoutes,fleet:tabFleet,money:tabMoney,rivals:tabRivals};
+  $('#app').innerHTML=tabs[UI.tab]();
+  const m=$('.mapbox');
+  if(m&&UI.zoom){if(UI.mapScroll==null){const [x]=proj(CI[P0().hq].lon,CI[P0().hq].lat);UI.mapScroll=x/W*m.scrollWidth-m.clientWidth/2;}m.scrollLeft=UI.mapScroll;}
+}
+function renderHeader(){
+  const me=P0(),h=$('#hdr');h.hidden=false;
+  const T=[['map','Map'],['routes','Routes'],['fleet','Fleet'],['money','Money'],['rivals','Rivals']];
+  h.innerHTML=`<div class="wrap"><div class="bar"><div class="brand">${esc(me.name)}<small>${G.over?'Final standings':qLabel(G.t)} · HQ ${CI[me.hq].name}</small></div>
+  <button class="btn primary" data-act="end" ${G.over?'disabled':''}>End quarter</button></div>
+  <div class="stats"><div class="stat"><span>Cash</span><b>${money(me.cash)}</b></div><div class="stat"><span>Debt</span><b>${money(me.debt)}</b></div><div class="stat"><span>Company value</span><b>${money(value(me))}</b></div><div class="stat"><span>Rank</span><b>${rankOf(me)} of 4</b></div></div>
+  <nav class="tabs" role="tablist">${T.map(([k,l])=>`<button role="tab" aria-selected="${UI.tab===k}" data-act="tab" data-k="${k}">${l}</button>`).join('')}</nav></div>`;
+}
+
+/* setup */
+function setupHTML(){
+  return `<section class="hero"><span class="lbl">Airline management · 2000 to 2020</span><h1>Contrail<br><em>Jet Age</em></h1>
+  <p>Build an airline across North America. Buy airport slots, open routes, choose aircraft and set fares while three rival airlines fight for the same passengers. You start with offices in your headquarters plus five random cities: two short-haul, one medium and two long-haul. The airline with the highest company value at the end of 2020 wins.</p></section>
+  <div class="panel" style="display:flex;flex-direction:column;gap:14px">
+  <div class="field"><label class="lbl" for="alname">Airline name</label><input id="alname" type="text" maxlength="28" value="Contrail Air"></div>
+  <div class="field"><span class="lbl">Headquarters</span><div class="hqgrid">${HQ_CHOICES.map(([c,s])=>`<button class="hq" data-act="pickhq" data-k="${c}" aria-pressed="${UI.setupHQ===c}"><span>${code(c)} <b>${CI[c].name}</b></span><small>${s}</small></button>`).join('')}</div></div>
+  <div class="actions"><button class="btn primary" data-act="start">Start in ${qLabel(0).replace(' · ',' ')}</button>${loadSave()?'<button class="btn" data-act="resume">Continue saved game</button>':''}</div></div>`;
+}
+
+/* map tab */
+function mapSVG(sel){
+  const me=P0();let s=`<svg viewBox="0 0 ${W} ${H}" class="map" role="img" aria-label="Route map of North America"><rect width="${W}" height="${H}" fill="var(--water)"/>`;
+  for(let lo=-120;lo<=-70;lo+=10){const [x]=proj(lo,0);s+=`<line x1="${x}" y1="0" x2="${x}" y2="${H}" stroke="var(--grat)" stroke-width=".6" stroke-dasharray="2 3"/>`;}
+  for(let la=20;la<=50;la+=10){const [,y]=proj(0,la);s+=`<line x1="0" y1="${y}" x2="${W}" y2="${y}" stroke="var(--grat)" stroke-width=".6" stroke-dasharray="2 3"/><text x="4" y="${y-3}" font-size="7" fill="var(--muted)">${la}°N</text>`;}
+  s+=`<path d="${LAND_D}" fill="var(--land)" stroke="var(--coast)" stroke-width=".7" stroke-linejoin="round"/><path d="${WATER_D}" fill="var(--water)" stroke="var(--coast)" stroke-width=".6"/>`;
+  for(const [lo,la] of BAHAMAS){const [x,y]=proj(lo,la);s+=`<circle cx="${x}" cy="${y}" r="1.6" fill="var(--land)" stroke="var(--coast)" stroke-width=".5"/>`;}
+  s+=`<g><line x1="14" y1="372" x2="104" y2="372" stroke="var(--muted)" stroke-width="1"/><line x1="14" y1="369" x2="14" y2="375" stroke="var(--muted)"/><line x1="104" y1="369" x2="104" y2="375" stroke="var(--muted)"/><text x="14" y="365" font-size="7.5" fill="var(--muted)">1,000 km</text></g>`;
+  for(let i=G.airlines.length-1;i>=0;i--){const al=G.airlines[i];if(al.out)continue;
+    for(const r of al.routes){const [x1,y1]=proj(CI[r.a].lon,CI[r.a].lat),[x2,y2]=proj(CI[r.b].lon,CI[r.b].lat),mx=(x1+x2)/2,my=(y1+y2)/2,dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy)||1,off=Math.min(26,L*0.12)*(i%2?-1:1)+(i?i*1.5:0);
+      s+=`<path d="M${x1} ${y1}Q${mx-dy/L*off} ${my+dx/L*off} ${x2} ${y2}" fill="none" stroke="${COLORS[i]}" stroke-width="${i?0.9:1.9}" stroke-opacity="${i?0.6:0.95}" stroke-linecap="round"/>`;}}
+  for(const c of CITIES){const [x,y]=proj(c.lon,c.lat),r=2+c.size*0.33,mine=(me.slots[c.id]||0)>0,hq=c.id===me.hq,hub=(me.hubs||[]).includes(c.id);
+    if(sel===c.id)s+=`<circle cx="${x}" cy="${y}" r="${r+5}" fill="none" stroke="var(--accent)" stroke-width="1.5"/>`;
+    if(hq)s+=`<rect x="${x-r-1.5}" y="${y-r-1.5}" width="${2*r+3}" height="${2*r+3}" fill="var(--accent)" stroke="var(--card)" stroke-width="1" transform="rotate(45 ${x} ${y})"/>`;
+    else if(hub)s+=`<rect x="${x-r-1}" y="${y-r-1}" width="${2*r+2}" height="${2*r+2}" fill="var(--card)" stroke="var(--accent)" stroke-width="2" transform="rotate(45 ${x} ${y})"/>`;
+    else s+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${mine?'var(--accent)':'var(--card)'}" stroke="var(--ink)" stroke-width="${mine?0.6:1}"/>`;
+    const fs=9,lx=c.anc==='l'?x-r-3:c.anc==='r'?x+r+3:x,ly=c.anc==='b'?y+r+fs:c.anc==='t'?y-r-3:y+3.2,an=c.anc==='l'?'end':c.anc==='r'?'start':'middle';
+    s+=`<text x="${lx}" y="${ly}" text-anchor="${an}" font-size="${fs}" font-weight="${mine?600:500}" fill="var(--ink)" stroke="var(--land)" stroke-width="2.4" paint-order="stroke" stroke-linejoin="round">${c.id}</text>`;
+    s+=`<circle class="hit" cx="${x}" cy="${y}" r="11" fill="transparent" data-city="${c.id}"><title>${c.name}</title></circle>`;}
+  return s+'</svg>';
+}
+function tabMap(){
+  const me=P0(),rk=ranking(),lead=rk[0],cities=[...CITIES].sort((a,b)=>b.size-a.size||a.name.localeCompare(b.name));
+  const left=END_T-G.t;
+  return `<div class="goal"><span class="lbl">Goal</span><span>Highest company value at the end of 2020. ${G.over?'<b>Game over.</b>':`<b>${left} quarter${left===1?'':'s'}</b> left.`} ${lead.al===me?'You are in the lead.':`Leader: <b>${esc(lead.al.name)}</b> at ${money(lead.v)}.`}</span></div>
+  <div class="mapbox${UI.zoom?' zoom':''}">${mapSVG(SHEET&&SHEET.city)}</div>
+  <div class="maptools"><div class="legend">${G.airlines.map((al,i)=>`<span>${dotOf(i)}${esc(al.name)}${al.out?' (bankrupt)':''}</span>`).join('')}</div><button class="btn sm" data-act="zoom">${UI.zoom?'Fit whole map':'Zoom map'}</button></div>
+  <p class="muted" style="font-size:12.5px">Filled diamond: your HQ. Outlined diamond: your hubs. Filled dot: your offices.</p>
+  <h3>Cities</h3><p class="muted" style="font-size:13.5px">Tap a city to buy slots or open a route. Each weekly round trip uses one slot at both ends.</p>
+  <div class="list">${cities.map(c=>{const own=me.slots[c.id]||0,owners=G.airlines.map((al,i)=>al.slots[c.id]>0&&i>0?dotOf(i):'').join('');
+    return `<button class="row" data-act="city" data-k="${c.id}">${code(c.id)}<div class="mid"><div>${c.name}${c.id===me.hq?' · HQ':(me.hubs||[]).includes(c.id)?' · Hub':''}</div><div class="sub">${ctry(c.id)} · Market ${c.size}/10${c.tour?' · Tourism '+'★'.repeat(c.tour):''} · ${cityFree(c.id)} of ${cityCap(c.id)} slots free</div></div><div class="end">${own?`<span class="num">${usedSlots(me,c.id)}/${own}</span> yours`:''}<span class="owners">${owners}</span></div></button>`;}).join('')}</div>`;
+}
+
+/* routes tab */
+function tabRoutes(){
+  const me=P0(),rs=[...me.routes].sort((a,b)=>(b.stats?b.stats.profit:0)-(a.stats?a.stats.profit:0));
+  const tot=rs.reduce((s,r)=>s+(r.stats?r.stats.profit:0),0),flights=rs.reduce((s,r)=>s+r.freq,0);
+  const head=`<div class="maptools"><h2>Routes</h2><button class="btn primary sm" data-act="newroute">+ New route</button></div><p class="muted" style="font-size:13.5px">Every route must touch your HQ${me.hubs.length?` or a hub (${me.hubs.map(c=>CI[c].name).join(', ')})`:''}. ${hubMsg(me)} As a ${NATION[me.home][1]} airline you can fly within ${NATION[me.home][0]} and abroad, but not domestic routes inside another country.</p>`;
+  if(!rs.length)return head+`<div class="empty"><b>No routes yet.</b><p class="muted">Start with a busy city near your headquarters. A route needs aircraft, a weekly schedule and a fare. Missing planes and slots are bought for you when you open it.</p><button class="btn primary" data-act="newroute">Open your first route</button></div>`;
+  return head+`<div class="grid2"><div class="kv"><span class="lbl">Routes</span><b>${rs.length}</b></div><div class="kv"><span class="lbl">Weekly round trips</span><b>${flights}</b></div><div class="kv"><span class="lbl">Route profit last quarter</span><b class="${cls(tot)}">${me.last?sgn(tot):'—'}</b></div></div>
+  <div class="list">${rs.map(r=>{const P=PI[r.plane],s=r.stats;return `<button class="row" data-act="editroute" data-k="${r.id}">${pairHTML(r.a,r.b)}<div class="mid"><div>${P.name} × ${r.planes}</div><div class="sub">${grounded(P,G.t)?'<b class="neg">Grounded</b> · ':''}${r.freq}/week · fare ${r.fp}% ($${Math.round(refFare(km(r.a,r.b))*r.fp/100)}) · ${fmtKm(km(r.a,r.b))}</div></div><div class="end">${s?`<div class="num ${cls(s.profit)}">${sgn(s.profit)}</div><div class="sub"><span class="lfbar"><i style="width:${Math.round(s.lf*100)}%"></i></span> ${Math.round(s.lf*100)}%</div>`:'<span class="sub">New</span>'}</div></button>`;}).join('')}</div>`;
+}
+
+/* fleet tab */
+const BUCKETS={range:[['Regional · under 3,000 km',P=>P.range<3000],['Medium · 3,000–7,000 km',P=>P.range>=3000&&P.range<7000],['Long haul · 7,000 km and up',P=>P.range>=7000]],
+ seats:[['Under 100 seats',P=>P.seats<100],['100–199 seats',P=>P.seats>=100&&P.seats<200],['200–299 seats',P=>P.seats>=200&&P.seats<300],['300 seats and up',P=>P.seats>=300]],
+ price:[['Under $30M',P=>P.price<30],['$30M–$75M',P=>P.price>=30&&P.price<75],['$75M–$150M',P=>P.price>=75&&P.price<150],['$150M and up',P=>P.price>=150]]};
+const SORTKEY={maker:'price',range:'range',seats:'seats',price:'price'};
+const maker=P=>P.name.split(' ')[0];
+const specs=P=>`<div class="spec"><div><span>Seats</span> <b class="num">${P.seats}</b></div><div><span>Range</span> <b class="num">${P.range.toLocaleString('en-US')} km</b></div><div><span>Speed</span> <b class="num">${P.speed} km/h</b></div><div><span>Cost per km</span> <b class="num">$${P.cpk.toFixed(1)}</b></div></div>`;
+function tabFleet(){
+  const me=P0(),y=yearOf(G.t),g=UI.fGroup||'maker',dir=UI.fDir||1,show=UI.fShow||'all';
+  const status=P=>available(P,G.t)?(grounded(P,G.t)?'grounded':'sale'):P.from>y?'soon':'retired';
+  const list=PLANES.filter(P=>{const own=(me.fleet[P.id]||0)>0,st=status(P);if(show==='owned')return own;if(show==='sale')return st==='sale'||st==='grounded';return st!=='retired'||own;});
+  const key=SORTKEY[g];list.sort((a,b)=>(a[key]-b[key])*dir||a.name.localeCompare(b.name));
+  let groups;
+  if(g==='maker'){const ms=[...new Set(list.map(maker))].sort((a,b)=>a.localeCompare(b));groups=ms.map(m=>[m,list.filter(P=>maker(P)===m)]);}
+  else{groups=BUCKETS[g].map(([n,f])=>[n,list.filter(f)]);if(dir<0)groups.reverse();}
+  groups=groups.filter(x=>x[1].length);
+  const owned=PLANES.reduce((s,P)=>s+(me.fleet[P.id]||0),0),idleN=PLANES.reduce((s,P)=>s+Math.max(0,idle(me,P.id)),0),fv=PLANES.reduce((s,P)=>s+(me.fleet[P.id]||0)*P.price*RESALE,0);
+  const seg=(act,cur,opts)=>`<div class="seg">${opts.map(([k,l])=>`<button data-act="${act}" data-k="${k}" aria-pressed="${cur===k}">${l}</button>`).join('')}</div>`;
+  const card=P=>{const st=status(P),own=me.fleet[P.id]||0,i=idle(me,P.id);
+    const tag=st==='soon'?`<span class="tag muted-tag">From ${P.from}</span>`:st==='retired'?'<span class="tag muted-tag">Out of production</span>':st==='grounded'?'<span class="tag bad-tag">Grounded</span>':P.from===y?'<span class="tag">New</span>':'';
+    return `<div class="plane${st==='soon'?' soon':''}"><div class="ptop"><div><h4>${P.name.replace(maker(P)+' ','')}</h4><span class="muted" style="font-size:12.5px">${maker(P)} · ${P.kind}${st==='sale'||st==='grounded'?` · until ${P.to}`:''}</span></div>${tag}</div>${specs(P)}${own?`<div style="font-size:13px">You own <b>${own}</b> · ${inUse(me,P.id)} flying · ${i} idle</div>`:''}${st==='sale'||st==='grounded'||i>0?`<div class="actions">${st==='sale'||st==='grounded'?`<button class="btn sm" data-act="buy" data-k="${P.id}" ${me.cash<P.price?'disabled':''}>Buy · ${money(P.price)}</button>`:''}${i>0?`<button class="btn sm" data-act="sell" data-k="${P.id}">Sell 1 · ${money(P.price*RESALE)}</button>`:''}</div>`:`<span class="muted num" style="font-size:12.5px">${money(P.price)}</span>`}</div>`;};
+  return `<h2>Fleet</h2><div class="grid2"><div class="kv"><span class="lbl">Aircraft owned</span><b>${owned}</b></div><div class="kv"><span class="lbl">Idle</span><b>${idleN}</b></div><div class="kv"><span class="lbl">Resale value</span><b>${money(fv)}</b></div></div>
+  <p class="muted" style="font-size:13px">Every plane you own costs 1.5% of its price per quarter in upkeep, idle or not. Opening a route buys the planes it needs.</p>
+  <div class="fctl"><div class="field"><span class="lbl">Group by</span>${seg('fgroup',g,[['maker','Maker'],['range','Range'],['seats','Seats'],['price','Cost']])}</div>
+  <div class="field"><span class="lbl">Order ${g==='maker'?'(by cost)':''}</span>${seg('fdir',String(dir),[['1','Low to high'],['-1','High to low']])}</div>
+  <div class="field"><span class="lbl">Show</span>${seg('fshow',show,[['all','All'],['sale','For sale'],['owned','Owned']])}</div></div>
+  ${groups.length?groups.map(([n,l])=>`<section class="fgroup"><h3>${n} <span class="muted num" style="font-size:14px">${l.length}</span></h3><div class="cards">${l.map(card).join('')}</div></section>`).join(''):'<p class="muted">Nothing to show. You don’t own any aircraft yet.</p>'}`;
+}
+
+/* charts */
+const CH={};
+function niceScale(min,max){min=Math.min(0,min);max=Math.max(0,max);if(max-min<1e-9)max=min+1;const raw=(max-min)/4,mag=10**Math.floor(Math.log10(raw)),step=[1,2,2.5,5,10].map(m=>m*mag).find(v=>v>=raw-1e-9);return{lo:Math.floor(min/step+1e-9)*step,hi:Math.ceil(max/step-1e-9)*step,step};}
+function chart(id,kind,ts,series){
+  const w=340,h=170,l=48,r=kind==='line'?46:10,tp=10,b=20,n=ts.length,iw=w-l-r;
+  const all=series.flatMap(x=>x.vals),sc=niceScale(Math.min(...all),Math.max(...all));
+  const X=i=>kind==='bar'?l+iw*(i+0.5)/n:l+(n<2?iw/2:iw*i/(n-1)),Y=v=>tp+(h-tp-b)*(sc.hi-v)/(sc.hi-sc.lo);
+  CH[id]={kind,ts,series,w,X:ts.map((_,i)=>X(i))};
+  let s=`<svg class="chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(series.map(x=>x.name).join(' and '))} by quarter">`;
+  for(let v=sc.lo;v<=sc.hi+1e-9;v+=sc.step)s+=`<line x1="${l}" x2="${w-r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--rule)" stroke-width="${Math.abs(v)<1e-9?1.3:0.6}"/><text x="${l-5}" y="${Y(v)+3}" text-anchor="end">${Math.abs(v)<1e-9?'$0':money(v)}</text>`;
+  const ny=new Set(ts.map(yearOf)).size,ys=Math.max(1,Math.ceil(ny/5));
+  ts.forEach((t,i)=>{if(t%4===0&&(yearOf(t)-START)%ys===0)s+=`<text x="${X(i)}" y="${h-5}" text-anchor="middle">${yearOf(t)}</text>`;});
+  if(kind==='bar'){const bw=Math.max(1.2,iw/n-2);series[0].vals.forEach((v,i)=>{const y0=Y(0),y1=Y(v);s+=`<rect x="${(X(i)-bw/2).toFixed(1)}" y="${Math.min(y0,y1).toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(0.8,Math.abs(y1-y0)).toFixed(1)}" rx="${Math.min(2,bw/3).toFixed(1)}" fill="${v>=0?'var(--good)':'var(--bad)'}"/>`;});}
+  else{const ends=[];series.forEach(se=>{s+=`<polyline points="${se.vals.map((v,i)=>X(i).toFixed(1)+','+Y(v).toFixed(1)).join(' ')}" fill="none" stroke="${se.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;const j=n-1;s+=`<circle cx="${X(j)}" cy="${Y(se.vals[j])}" r="3.5" fill="${se.color}" stroke="var(--card)" stroke-width="2"/>`;ends.push({y:Y(se.vals[j]),txt:se.name});});
+    ends.sort((a,c)=>a.y-c.y);for(let k=1;k<ends.length;k++)if(ends[k].y-ends[k-1].y<11)ends[k].y=ends[k-1].y+11;ends.forEach(e=>{s+=`<text x="${X(n-1)+7}" y="${e.y+3}" style="fill:var(--ink)">${e.txt}</text>`;});}
+  s+=`<line class="xh" x1="0" x2="0" y1="${tp}" y2="${h-b}" stroke="var(--muted)" stroke-width="1" stroke-dasharray="2 2" visibility="hidden"/></svg>`;
+  return `<div class="chartbox" data-chart="${id}">${s}<div class="tip" hidden></div></div>`;
+}
+function chartHover(e){
+  const box=e.target.closest?e.target.closest('.chartbox'):null;
+  document.querySelectorAll('.chartbox').forEach(bx=>{if(bx!==box){bx.querySelector('.tip').hidden=true;bx.querySelector('.xh').setAttribute('visibility','hidden');}});
+  if(!box)return;const c=CH[box.dataset.chart];if(!c)return;
+  const rc=box.querySelector('svg').getBoundingClientRect(),vx=(e.clientX-rc.left)/rc.width*c.w;
+  let i=0,bd=1e9;c.X.forEach((x,k)=>{const d=Math.abs(x-vx);if(d<bd){bd=d;i=k;}});
+  const xh=box.querySelector('.xh');xh.setAttribute('x1',c.X[i]);xh.setAttribute('x2',c.X[i]);xh.setAttribute('visibility','visible');
+  const tip=box.querySelector('.tip');
+  tip.innerHTML=`<span class="lbl">${qLabel(c.ts[i])}</span>`+c.series.map(se=>`<span>${se.color?`<span class="dot" style="background:${se.color}"></span> `:''}${se.name} <b>${c.kind==='bar'?sgn(se.vals[i]):money(se.vals[i])}</b></span>`).join('');
+  tip.hidden=false;const px=c.X[i]/c.w*rc.width,tw=tip.offsetWidth;tip.style.left=Math.max(0,px+12+tw>rc.width?px-tw-12:px+12)+'px';
+}
+function moneyCharts(me){
+  const f=me.fin||[];if(!f.length)return '';const ts=f.map(x=>x.t);
+  const leg=l=>`<div class="legend">${l.map(([n,c])=>`<span><span class="dot" style="background:${c}"></span>${n}</span>`).join('')}</div>`;
+  const tbl=`<details><summary>Show the numbers as a table</summary><div class="tscroll"><table><thead><tr><th>Quarter</th><th class="r">Revenue</th><th class="r">Costs</th><th class="r">Net</th><th class="r">Cash</th><th class="r">Debt</th><th class="r">Passengers</th></tr></thead><tbody>${[...f].reverse().map(x=>`<tr><td>${qLabel(x.t)}</td><td class="r num">${money(x.rev)}</td><td class="r num">${money(x.cost)}</td><td class="r num ${cls(x.net)}">${sgn(x.net)}</td><td class="r num">${money(x.cash)}</td><td class="r num">${money(x.debt)}</td><td class="r num">${Math.round(x.pax).toLocaleString('en-US')}</td></tr>`).join('')}</tbody></table></div></details>`;
+  return `<div class="panel cpanel"><h3>Revenue and costs</h3>${leg([['Revenue','var(--c1)'],['Costs','var(--c2)']])}${chart('rc','line',ts,[{name:'Revenue',color:'var(--c1)',vals:f.map(x=>x.rev)},{name:'Costs',color:'var(--c2)',vals:f.map(x=>x.cost)}])}</div>
+  <div class="panel cpanel"><h3>Net profit per quarter</h3>${chart('np','bar',ts,[{name:'Net profit',vals:f.map(x=>x.net)}])}</div>
+  <div class="panel cpanel"><h3>Cash and debt</h3>${leg([['Cash','var(--c3)'],['Debt','var(--c2)']])}${chart('cd','line',ts,[{name:'Cash',color:'var(--c3)',vals:f.map(x=>x.cash)},{name:'Debt',color:'var(--c2)',vals:f.map(x=>x.debt)}])}</div>${tbl}`;
+}
+
+/* money tab */
+function tabMoney(){
+  const me=P0(),L=me.last,line=(k,v,neg)=>`<tr><td>${k}</td><td class="r num ${neg&&v>0?'neg':''}">${L?(neg?(v>0?'−':'')+money(v).replace('−',''):money(v)):'—'}</td></tr>`;
+  return `<h2>Money</h2><div class="grid2"><div class="kv"><span class="lbl">Cash</span><b>${money(me.cash)}</b></div><div class="kv"><span class="lbl">Debt</span><b>${money(me.debt)}</b></div><div class="kv"><span class="lbl">Company value</span><b>${money(value(me))}</b></div><div class="kv"><span class="lbl">Reputation</span><b>${Math.round(me.rep*100)}</b></div></div>
+  <div class="panel"><h3 style="margin-bottom:8px">Last quarter${L?' · '+qLabel(G.t-1):''}</h3>${L?`<div class="tscroll"><table><tbody>${line('Ticket revenue',L.rev)}${line('Flight operations',L.op,1)}${line('Aircraft upkeep',L.up,1)}${line('Slot fees',L.slot,1)}${line('Head office',L.over,1)}${line('Advertising',L.ads,1)}${line('Interest',L.int,1)}<tr><td><b>Net profit</b></td><td class="r num ${cls(L.net)}"><b>${sgn(L.net)}</b></td></tr></tbody></table></div><p class="muted" style="font-size:13px;margin-top:6px">${Math.round(L.pax).toLocaleString('en-US')} passengers carried.</p>`:'<p class="muted">Results and charts appear after you end your first quarter.</p>'}</div>
+  ${moneyCharts(me)}
+  <div class="field"><span class="lbl">Advertising per quarter</span><div class="seg">${AD.map((c,i)=>`<button data-act="ad" data-k="${i}" aria-pressed="${me.ad===i}">${AD_NAMES[i]}<br><span class="num" style="font-size:11.5px">${c?money(c):'$0'}</span></button>`).join('')}</div><p class="muted" style="font-size:13px">Ads and newer aircraft raise your reputation, which wins you a bigger share of passengers on shared routes.</p></div>
+  <div class="field"><span class="lbl">Bank loans · 1.5% interest per quarter · limit ${money(maxDebt(me))}</span><div class="actions"><button class="btn" data-act="borrow" ${me.debt+25>maxDebt(me)?'disabled':''}>Borrow $25M</button><button class="btn" data-act="repay" ${me.debt<=0||me.cash<Math.min(25,me.debt)?'disabled':''}>Repay ${money(Math.min(25,me.debt)||25)}</button></div></div>
+  <div class="field"><span class="lbl">Game</span><div class="actions">${UI.confirmNew?`<button class="btn danger" data-act="newgame2">Erase this game and start over</button><button class="btn" data-act="newgame0">Keep playing</button>`:`<button class="btn" data-act="newgame1">New game</button>`}</div><p class="muted" style="font-size:13px">Your game saves in this browser after every action.</p></div>`;
+}
+
+/* rivals tab */
+function chartSVG(){
+  const n=Math.max(2,...G.airlines.map(a=>a.hist.length)),mx=Math.max(500,...G.airlines.flatMap(a=>a.hist));
+  const raw=mx/4,mag=10**Math.floor(Math.log10(raw)),step=[1,2,5,10].map(m=>m*mag).find(v=>v>=raw),top=Math.ceil(mx/step)*step,w=340,h=160,l=40,b=20,tp=8;
+  const X=i=>l+(w-l-8)*i/(END_T),Y=v=>tp+(h-tp-b)*(1-Math.max(0,v)/top);
+  let s=`<svg class="chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="Company value over time">`;
+  for(let v=0;v<=top;v+=step)s+=`<line x1="${l}" x2="${w-8}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--rule)" stroke-width="1"/><text x="${l-5}" y="${Y(v)+3}" text-anchor="end">${money(v)}</text>`;
+  for(let y=START;y<=START+20;y+=5){const i=(y-START)*4;s+=`<text x="${X(i)}" y="${h-5}" text-anchor="middle">${y}</text>`;}
+  G.airlines.forEach((al,i)=>{if(al.hist.length<1)return;const pts=al.hist.map((v,j)=>`${X(j).toFixed(1)},${Y(v).toFixed(1)}`).join(' ');s+=`<polyline points="${pts}" fill="none" stroke="${COLORS[i]}" stroke-width="${i?1.5:2.4}" stroke-linejoin="round"/>`;const j=al.hist.length-1;s+=`<circle cx="${X(j)}" cy="${Y(al.hist[j])}" r="3" fill="${COLORS[i]}"/>`;});
+  return s+'</svg>';
+}
+function tabRivals(){
+  const rk=ranking();
+  return `<h2>Rivals</h2><div class="tscroll"><table><thead><tr><th>#</th><th>Airline</th><th class="r">Value</th><th class="r">Cash</th><th class="r">Routes</th><th class="r">Cities</th><th class="r">Pax/qtr</th></tr></thead><tbody>${rk.map((x,k)=>{const al=x.al,cs=new Set();al.routes.forEach(r=>{cs.add(r.a);cs.add(r.b)});return `<tr><td class="num">${k+1}</td><td>${dotOf(x.i)} ${esc(al.name)}<div class="sub muted" style="font-size:12px">HQ ${al.hq}${al.out?' · bankrupt':''}</div></td><td class="r num">${al.out?'—':money(x.v)}</td><td class="r num">${money(al.cash)}</td><td class="r num">${al.routes.length}</td><td class="r num">${cs.size}</td><td class="r num">${al.last?Math.round(al.last.pax/1000)+'K':'—'}</td></tr>`;}).join('')}</tbody></table></div>
+  <div class="panel"><h3 style="margin-bottom:6px">Company value</h3>${chartSVG()}</div>
+  <h3>Dispatches</h3><ul class="news">${G.log.slice(0,25).map(n=>`<li><span class="num">${qLabel(n.t)}</span><span>${esc(n.text)}</span></li>`).join('')}</ul>`;
+}
+
+/* sheets */
+function openSheet(html,meta){SHEET=meta||{};$('#sheetRoot').innerHTML=`<div class="scrim" data-act="close"></div><div class="sheet" role="dialog" aria-modal="true">${html}</div>`;if(UI.tab==='map')render();}
+function closeSheet(){$('#sheetRoot').innerHTML='';SHEET=null;RB=null;render();}
+const sheetHead=(title,sub)=>`<div class="grab"></div><div class="shead"><div><h2>${title}</h2>${sub?`<p class="muted" style="font-size:13.5px">${sub}</p>`:''}</div><button class="btn sm x" data-act="close" aria-label="Close">Close</button></div>`;
+
+function citySheet(id){
+  const c=CI[id],me=P0(),own=me.slots[id]||0,used=usedSlots(me,id),cap=cityCap(id),free=cityFree(id),price=slotPrice(id);
+  let bar='';G.airlines.forEach((al,i)=>{const n=al.slots[id]||0;if(n)bar+=`<i style="width:${n/cap*100}%;background:${COLORS[i]}"></i>`;});
+  const routes=[];G.airlines.forEach((al,i)=>al.routes.forEach(r=>{if(r.a===id||r.b===id)routes.push({al,i,r});}));
+  const html=sheetHead(`${code(id)} ${c.name}`,`Market ${c.size}/10${c.tour?' · Tourism '+'★'.repeat(c.tour):''}${id===me.hq?' · Your headquarters':me.hubs.includes(id)?' · Your hub':''} · ${NATION[ctry(id)][0].replace(/^the /,'')}`)+
+  `<div class="field"><span class="lbl">Airport slots · ${free} of ${cap} free</span><div class="slotbar">${bar}</div><div class="legend">${G.airlines.map((al,i)=>al.slots[id]?`<span>${dotOf(i)}${i?esc(al.name):'You'} ${al.slots[id]}</span>`:'').join('')}</div></div>
+  <div class="grid2"><div class="kv"><span class="lbl">Your slots</span><b>${own?`${used} used of ${own}`:'None'}</b></div><div class="kv"><span class="lbl">Slot price</span><b>${money(price)}</b></div></div>
+  <div class="actions">${own?`<button class="btn" data-act="buyslots" data-k="${id}" data-n="2" ${free<2||me.cash<price*2?'disabled':''}>Buy 2 slots · ${money(price*2)}</button>`:`<button class="btn" data-act="office" data-k="${id}" ${free<2||me.cash<officeFee(id)+price*2?'disabled':''}>Open office + 2 slots · ${money(officeFee(id)+price*2)}</button>`}<button class="btn primary" data-act="routefrom" data-k="${id}">${isGate(me,id)?'Open a route from here':'Open a route to here'}</button></div>
+  ${ctry(id)===me.home&&!isGate(me,id)?`<div class="field"><span class="lbl">Hub</span>${me.hubs.length<maxHubs(G.t)?`<button class="btn" data-act="hub" data-k="${id}" ${me.cash<hubCost(id)+(own?0:officeFee(id))||cityFree(id)<(own?0:1)?'disabled':''}>Make ${c.name} a hub · ${money(hubCost(id)+(own?0:officeFee(id)))}</button><p class="muted" style="font-size:12.5px">Routes can start here, and you get up to 8 extra slots.</p>`:`<p class="muted" style="font-size:13.5px">${hubMsg(me)}</p>`}</div>`:''}
+  ${ctry(id)!==me.home?`<p class="muted" style="font-size:13px">${NATION[ctry(id)][0].replace(/^t/,'T')} is foreign for a ${NATION[me.home][1]} airline. You can fly here from ${NATION[me.home][0]}, but not between two cities inside it.</p>`:''}
+  <div class="field"><span class="lbl">Routes at ${c.name}</span>${routes.length?`<div class="list">${routes.map(({al,i,r})=>{const o=r.a===id?r.b:r.a;return `<div class="row" style="cursor:default">${dotOf(i)}<div class="mid"><div>${pairHTML(id,o)} <span class="sub">${i?esc(al.name):'You'}</span></div><div class="sub">${PI[r.plane].name} · ${r.freq}/week · fare $${Math.round(refFare(km(r.a,r.b))*r.fp/100)}</div></div><div class="end num sub">${r.stats?Math.round(r.stats.lf*100)+'% full':'new'}</div></div>`;}).join('')}</div>`:'<p class="muted">Nobody flies here yet.</p>'}</div>`;
+  openSheet(html,{city:id});
+}
+
+function availPlanesFor(al,d){return PLANES.filter(P=>(available(P,G.t)||idle(al,P.id)>0)&&P.range>=d);}
+function bestDest(al,a){let best=null,bv=-1;const maxR=Math.max(...PLANES.filter(P=>available(P,G.t)).map(P=>P.range));
+  for(const c of CITIES){if(c.id===a||routeRule(al,a,c.id)||al.routes.some(r=>pairKey(r.a,r.b)===pairKey(a,c.id)))continue;const d=km(a,c.id);if(d>maxR)continue;const v=baseDemand(a,c.id,G.t)/(entriesFor(a,c.id,null).length+1);if(v>bv){bv=v;best=c.id;}}
+  return best||CITIES.find(c=>c.id!==a).id;}
+function autoPick(){const me=P0(),d=km(RB.a,RB.b),list=availPlanesFor(me,d);if(!list.length){RB.plane=null;return;}
+  const D=baseDemand(RB.a,RB.b,G.t)/(entriesFor(RB.a,RB.b,RB.routeId).length+1);let best=null;
+  for(const P of list){const freq=clamp(Math.round(D/(P.seats*0.85)),1,28),inp={...RB,plane:P.id,freq},plan=planRoute(me,inp);if(plan.need===0)continue;const est=estimate(me,inp,plan),sc=est.profit-0.05*plan.cost;if(!best||sc>best.sc)best={sc,P,freq};}
+  if(best){RB.plane=best.P.id;RB.freq=best.freq;}else{RB.plane=list[0].id;RB.freq=1;}}
+function openBuilder(o){
+  const me=P0();
+  if(o.routeId){const r=me.routes.find(x=>x.id===o.routeId);RB={routeId:r.id,a:r.a,b:r.b,plane:r.plane,freq:r.freq,fp:r.fp,confirmClose:false};}
+  else{RB={routeId:null,a:o.a,b:o.b||null,plane:null,freq:1,fp:100};if(!RB.b||RB.b===RB.a)RB.b=bestDest(me,RB.a);autoPick();}
+  renderBuilder();
+}
+function renderBuilder(){
+  const me=P0(),{a,b}=RB,d=km(a,b),r=refFare(d),editing=!!RB.routeId;
+  const ents=entriesFor(a,b,RB.routeId),list=availPlanesFor(me,d);
+  if(RB.plane&&!list.some(P=>P.id===RB.plane)&&!(editing&&RB.plane))RB.plane=list[0]?list[0].id:null;
+  const plan=planRoute(me,RB),P=PI[RB.plane],est=P&&plan.need?estimate(me,RB,plan):null;
+  const origins=CITIES.filter(c=>isGate(me,c.id));
+  const opts=CITIES.filter(c=>c.id!==a).sort((x,y)=>x.name.localeCompare(y.name));
+  const planeOpts=PLANES.filter(Q=>available(Q,G.t)||(me.fleet[Q.id]||0)>0);
+  const html=sheetHead(editing?'Edit route':'New route',editing?`${CI[a].name} ⇄ ${CI[b].name} · ${fmtKm(d)}`:'Missing planes and slots are bought automatically.')+
+  (editing?'':`<div class="grid2"><div class="field"><label class="lbl" for="rbA">From (HQ or hub)</label><select id="rbA" data-rb="a">${origins.map(c=>`<option value="${c.id}" ${c.id===a?'selected':''}>${c.name} (${c.id})</option>`).join('')}</select></div>
+  <div class="field"><label class="lbl" for="rbB">To</label><select id="rbB" data-rb="b">${[['Your offices',opts.filter(c=>me.slots[c.id]>0&&!routeRule(me,a,c.id))],['New city · opens an office',opts.filter(c=>!(me.slots[c.id]>0)&&!routeRule(me,a,c.id))],['Not allowed from here',opts.filter(c=>routeRule(me,a,c.id))]].map(([g,l])=>l.length?`<optgroup label="${g}">${l.map(c=>`<option value="${c.id}" ${c.id===b?'selected':''} ${routeRule(me,a,c.id)?'disabled':''}>${c.name} (${c.id}) · ${fmtKm(km(a,c.id))}</option>`).join('')}</optgroup>`:'').join('')}</select></div></div>`)+
+  `<div class="forecast" style="background:transparent;padding:0"><div class="kv"><span class="lbl">Distance</span><b>${fmtKm(d)}</b></div><div class="kv"><span class="lbl">Standard fare</span><b>$${Math.round(r)}</b></div><div class="kv"><span class="lbl">Market / week</span><b>${Math.round(baseDemand(a,b,G.t)).toLocaleString('en-US')} pax</b></div></div>
+  ${ents.length?`<div class="field"><span class="lbl">Competition on this route</span>${ents.map(x=>`<div style="display:flex;gap:8px;align-items:center;font-size:13.5px">${dotOf(x.i)}<span>${x.i?esc(x.al.name):'You'} · ${PI[x.r.plane].name} · ${x.r.freq}/week · $${Math.round(r*x.r.fp/100)}</span></div>`).join('')}</div>`:''}
+  <div class="field"><label class="lbl" for="rbP">Aircraft</label><select id="rbP" data-rb="plane">${planeOpts.map(Q=>{const ok=Q.range>=d,n=idle(me,Q.id)+(editing&&RB.routeId&&me.routes.find(x=>x.id===RB.routeId).plane===Q.id?me.routes.find(x=>x.id===RB.routeId).planes:0);return `<option value="${Q.id}" ${Q.id===RB.plane?'selected':''} ${ok?'':'disabled'}>${Q.name} · ${Q.seats} seats · ${money(Q.price)}${n>0?` · ${n} idle`:''}${ok?'':' · out of range'}</option>`;}).join('')}</select>${P?`<span class="muted" style="font-size:12.5px">${P.kind} · one plane flies up to ${plan.trips||maxTrips(P,d)} round trips a week here</span>`:''}</div>
+  <div class="grid2"><div class="field"><span class="lbl">Round trips per week</span><div class="stepper"><button data-act="rb" data-k="freq" data-d="-1" aria-label="Fewer flights">−</button><b>${RB.freq}</b><button data-act="rb" data-k="freq" data-d="1" aria-label="More flights">+</button></div></div>
+  <div class="field"><span class="lbl">Fare</span><div class="stepper"><button data-act="rb" data-k="fp" data-d="-5" aria-label="Lower fare">−</button><b>$${Math.round(r*RB.fp/100)}</b><button data-act="rb" data-k="fp" data-d="5" aria-label="Raise fare">+</button></div><span class="muted" style="font-size:12.5px">${RB.fp}% of standard</span></div></div>
+  ${P&&plan.need?`<div class="field"><span class="lbl">What this takes</span><p style="font-size:14px">${plan.need} × ${P.name}${plan.buyPlanes?` (buying ${plan.buyPlanes}${plan.useIdle?`, using ${plan.useIdle} you own`:''})`:' (already owned)'}${plan.buyA?` · ${plan.buyA} slots at ${a}`:''}${plan.buyB?` · ${plan.buyB} slots at ${b}`:''}${plan.office.length?` · new office in ${plan.office.map(c=>CI[c].name).join(' and ')} (${money(plan.office.reduce((x,c)=>x+officeFee(c),0))})`:''}. Up front: <b class="num">${money(plan.cost)}</b></p></div>`:''}
+  ${est?`<div class="forecast"><div class="kv"><span class="lbl">Pax / week each way</span><b>${Math.round(est.pax)}</b></div><div class="kv"><span class="lbl">Load factor</span><b>${Math.round(est.lf*100)}%</b></div><div class="kv"><span class="lbl">Revenue / qtr</span><b>${money(est.rev)}</b></div><div class="kv"><span class="lbl">Profit / qtr</span><b class="${cls(est.profit)}">${sgn(est.profit)}</b></div></div><p class="muted" style="font-size:12.5px;margin-top:-8px">Forecast for ${qLabel(G.t)} with today's competition. Upkeep counts only the planes on this route.</p>`:''}
+  ${P&&grounded(P,G.t)?'<p class="err">This aircraft is grounded right now. It will carry no passengers until the ban lifts.</p>':''}${plan.err?`<p class="err">${esc(plan.err)}</p>`:''}
+  <div class="actions"><button class="btn primary" data-act="rbsave" ${plan.err?'disabled':''}>${editing?'Save changes':'Open route'}${plan.cost>0?' · '+money(plan.cost):''}</button>${editing?`<button class="btn danger" data-act="rbclose">${RB.confirmClose?'Tap again to close':'Close route'}</button>`:''}</div>`;
+  const keep=$('.sheet')?$('.sheet').scrollTop:0;
+  openSheet(html,{builder:true});$('.sheet').scrollTop=keep;
+}
+function reportSheet(){
+  const me=P0(),L=me.last,rk=ranking();
+  let html;
+  if(G.over){
+    const won=!G.lost&&rk[0].al===me;
+    html=sheetHead(G.lost?'Bankrupt':won?'You win':'Final standings',G.lost?'The bank stopped lending and the airline folded.':'The game ends at the close of 2020.')+
+    `<div class="list">${rk.map((x,k)=>`<div class="row" style="cursor:default"><span class="num">${k+1}</span><div class="mid"><div>${dotOf(x.i)} ${esc(x.al.name)}</div></div><div class="end num">${x.al.out?'bankrupt':money(x.v)}</div></div>`).join('')}</div>
+    <div class="actions"><button class="btn primary" data-act="newgame2">Play again</button><button class="btn" data-act="close">Look around</button></div>`;
+  }else{
+    const best=[...me.routes].filter(r=>r.stats).sort((a,b)=>b.stats.profit-a.stats.profit)[0];
+    html=sheetHead(`${qLabel(G.t-1)} results`,`Now planning ${qLabel(G.t)} · rank ${rankOf(me)} of 4`)+
+    `<div><span class="lbl">Net profit</span><div class="big ${cls(L.net)}">${sgn(L.net)}</div></div>
+    <div class="grid2"><div class="kv"><span class="lbl">Revenue</span><b>${money(L.rev)}</b></div><div class="kv"><span class="lbl">Costs</span><b>${money(L.rev-L.net)}</b></div><div class="kv"><span class="lbl">Passengers</span><b>${Math.round(L.pax).toLocaleString('en-US')}</b></div><div class="kv"><span class="lbl">Cash</span><b>${money(me.cash)}</b></div></div>
+    ${best?`<p style="font-size:14px">Best route: ${pairHTML(best.a,best.b)} <span class="num ${cls(best.stats.profit)}">${sgn(best.stats.profit)}</span> at ${Math.round(best.stats.lf*100)}% full.</p>`:''}
+    ${G.news.length?`<div class="field"><span class="lbl">Dispatches</span><ul class="news">${G.news.slice(0,8).map(n=>`<li><span class="num">${n.kind==='event'?'NEWS':n.kind==='plane'?'FLEET':n.kind==='you'?'YOU':'RIVAL'}</span><span>${esc(n.text)}</span></li>`).join('')}</ul></div>`:''}
+    <div class="actions"><button class="btn primary" data-act="close">Continue</button></div>`;
+  }
+  openSheet(html,{report:true});
+}
+function welcomeSheet(){
+  openSheet(sheetHead('Welcome aboard',`${qLabel(G.t)} · ${CI[P0().hq].name}`)+`<ul class="news"><li><span class="num">0</span><span>Your starting offices: ${(()=>{const st=P0().start,f=l=>l.map(c=>`${CI[c].name} (${fmtKm(km(P0().hq,c))})`).join(', ');return `<b>short-haul</b> ${f(st.short)}; <b>medium</b> ${f(st.med)}; <b>long-haul</b> ${f(st.long)}.`})()} Opening any other city costs an office fee.</span></li><li><span class="num">·</span><span>Every route must start at your HQ for now. Hub rights expand every three years. Real traffic rules apply: no domestic routes inside a foreign country.</span></li><li><span class="num">1</span><span>Tap a city on the map, or use <b>New route</b> on the Routes tab.</span></li><li><span class="num">2</span><span>Pick a destination, an aircraft, how many round trips a week, and a fare. Planes and slots you lack are bought for you.</span></li><li><span class="num">3</span><span>Press <b>End quarter</b> to fly the schedule. Full planes earn money; empty seats cost it.</span></li><li><span class="num">4</span><span>New aircraft arrive over the years, real events shake demand, and three rivals expand every quarter.</span></li></ul><div class="actions"><button class="btn primary" data-act="close">Start flying</button></div>`,{});
+}
+
+/* events */
+function handle(act,el){
+  const me=G&&P0(),k=el.dataset.k;
+  switch(act){
+    case 'pickhq':UI.setupHQ=k;render();break;
+    case 'start':{const n=($('#alname').value||'').trim()||'Contrail Air';newGame(n,UI.setupHQ);UI.tab='map';UI.mapScroll=null;save();render();welcomeSheet();break;}
+    case 'resume':G=migrate(loadSave());UI.mapScroll=null;render();break;
+    case 'tab':UI.tab=k;UI.confirmNew=false;render();window.scrollTo(0,0);break;
+    case 'zoom':UI.zoom=!UI.zoom;UI.mapScroll=null;render();break;
+    case 'city':citySheet(k);break;
+    case 'close':closeSheet();break;
+    case 'end':if(G.over)return;endQuarter();save();render();reportSheet();break;
+    case 'hub':{const cost=hubCost(k)+(me.slots[k]>0?0:officeFee(k));if(ctry(k)===me.home&&!isGate(me,k)&&me.hubs.length<maxHubs(G.t)&&me.cash>=cost){openHub(me,k);addNews(`You open a hub in ${CI[k].name}.`,'you');save();renderHeader();citySheet(k);}break;}
+    case 'fgroup':UI.fGroup=k;render();break;
+    case 'fdir':UI.fDir=+k;render();break;
+    case 'fshow':UI.fShow=k;render();break;
+    case 'office':{const p=officeFee(k)+slotPrice(k)*2;if(!(me.slots[k]>0)&&cityFree(k)>=2&&me.cash>=p){me.cash-=p;me.slots[k]=2;addNews(`You open an office in ${CI[k].name}.`,'you');save();renderHeader();citySheet(k);}break;}
+    case 'buyslots':{const n=+el.dataset.n,p=slotPrice(k)*n;if(cityFree(k)>=n&&me.cash>=p){me.cash-=p;me.slots[k]=(me.slots[k]||0)+n;save();renderHeader();citySheet(k);}break;}
+    case 'routefrom':{if(isGate(me,k))openBuilder({a:k});else{const g=gates(me).filter(x=>!routeRule(me,x,k)).sort((x,y)=>(x===me.hq?-1:0)-(y===me.hq?-1:0)||km(x,k)-km(y,k));openBuilder({a:g[0]||me.hq,b:k});}break;}
+    case 'newroute':openBuilder({a:me.hq});break;
+    case 'editroute':openBuilder({routeId:k});break;
+    case 'rb':{const d=+el.dataset.d;if(el.dataset.k==='freq')RB.freq=clamp(RB.freq+d,1,28);else RB.fp=clamp(RB.fp+d,60,160);renderBuilder();break;}
+    case 'rbsave':{const plan=planRoute(me,RB);if(plan.err)return;applyPlan(me,{...RB},plan);save();UI.tab=UI.tab==='map'?'map':'routes';closeSheet();break;}
+    case 'rbclose':if(!RB.confirmClose){RB.confirmClose=true;renderBuilder();}else{closeRoute(me,RB.routeId);save();closeSheet();}break;
+    case 'sell':if(idle(me,k)>0){me.fleet[k]--;me.cash+=PI[k].price*RESALE;save();render();}break;
+    case 'buy':if(me.cash>=PI[k].price){me.cash-=PI[k].price;me.fleet[k]=(me.fleet[k]||0)+1;save();render();}break;
+    case 'ad':me.ad=+k;save();render();break;
+    case 'borrow':if(me.debt+25<=maxDebt(me)){me.debt+=25;me.cash+=25;save();render();}break;
+    case 'repay':{const x=Math.min(25,me.debt);if(x>0&&me.cash>=x){me.debt-=x;me.cash-=x;save();render();}break;}
+    case 'newgame1':UI.confirmNew=true;render();break;
+    case 'newgame0':UI.confirmNew=false;render();break;
+    case 'newgame2':G=null;UI.confirmNew=false;try{localStorage.removeItem('contrail-save-v2');}catch(e){}$('#sheetRoot').innerHTML='';SHEET=null;render();window.scrollTo(0,0);break;
+  }
+}
+function start(data){
+  G=migrate((data&&data.G)||loadSave());if(data&&data.UI)Object.assign(UI,data.UI);
+  document.addEventListener('click',e=>{const c=e.target.closest('[data-city]');if(c){citySheet(c.dataset.city);return;}const el=e.target.closest('[data-act]');if(el&&!el.disabled)handle(el.dataset.act,el);});
+  document.addEventListener('change',e=>{const f=e.target.dataset&&e.target.dataset.rb;if(!f||!RB)return;
+    if(f==='a'){RB.a=e.target.value;if(RB.b===RB.a||routeRule(P0(),RB.a,RB.b))RB.b=bestDest(P0(),RB.a);autoPick();}
+    else if(f==='b'){RB.b=e.target.value;autoPick();}
+    else if(f==='plane'){RB.plane=e.target.value;}
+    renderBuilder();});
+  document.addEventListener('pointermove',chartHover);document.addEventListener('pointerdown',chartHover);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&SHEET)closeSheet();});
+  window.claude?.hot?.snapshot?.(()=>({G,UI:{tab:UI.tab,zoom:UI.zoom,setupHQ:UI.setupHQ,fGroup:UI.fGroup,fDir:UI.fDir,fShow:UI.fShow}}));
+  render();
+}
+if(typeof document!=='undefined'){window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});}
+</script>
+
+</body></html>

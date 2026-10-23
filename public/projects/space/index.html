@@ -1,0 +1,1424 @@
+<!doctype html><html><head><meta charset=utf8><meta name="robots" content="noindex"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Dark Galaxy</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout: star chart is the hero; command console sits beside it on wide screens, below it on phones; End Turn pinned to the bottom edge. Single deliberate dark look (deep space). */
+:root{
+  color-scheme:dark;
+  --void:#06080f;
+  --deep:#0b1020;
+  --panel:#10172a;
+  --line:#1f2a45;
+  --fg:#e2e6f4;
+  --dim:#8790ac;
+  --amber:#f2b84b;
+  --amber-ink:#1d1405;
+  --vesh:#e45c6a;
+  --orun:#4fc3c8;
+  --good:#7fd19b;
+  --bad:#ef7a7a;
+  --f-display:'Saira Condensed','Arial Narrow',sans-serif;
+  --f-body:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+html,body{background:var(--void);color:var(--fg)}
+body{font-family:var(--f-body);font-size:15px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:14px 104px}
+.wrap{max-width:1120px;margin:0 auto;display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:900px){.wrap{grid-template-columns:minmax(0,1fr) 370px;align-items:start}header{grid-column:1/-1}}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px}
+.brand{font-family:var(--f-display);font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase;line-height:1}
+.brand span{color:var(--amber)}
+.hright{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.stats{display:flex;gap:6px 14px;font-family:var(--f-mono);font-size:12.5px;color:var(--dim);flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.stats b{color:var(--fg);font-weight:500}
+.stats .up{color:var(--good)}
+.ghost{background:none;border:1px solid var(--line);color:var(--dim);font:500 12px var(--f-body);letter-spacing:.06em;padding:6px 10px;border-radius:3px;cursor:pointer}
+.ghost.armed{border-color:var(--bad);color:var(--bad)}
+.mapbox{position:relative;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--deep)}
+canvas{display:block;width:100%;touch-action:manipulation;cursor:pointer}
+.banner{position:absolute;left:8px;right:8px;top:8px;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  background:rgba(16,23,42,.92);border:1px solid var(--amber);color:var(--fg);padding:8px 10px;border-radius:3px;font-size:13.5px}
+.toast{position:absolute;left:8px;right:8px;bottom:8px;background:rgba(16,23,42,.94);border-left:3px solid var(--amber);padding:8px 10px;font-size:13.5px;border-radius:2px;transition:opacity .3s}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:4px;min-width:0}
+.tabs{display:flex;border-bottom:1px solid var(--line)}
+.tab{flex:1;background:none;border:0;border-bottom:2px solid transparent;color:var(--dim);font:600 11.5px var(--f-body);letter-spacing:.14em;text-transform:uppercase;padding:13px 0 11px;cursor:pointer;position:relative}
+.tab[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--amber)}
+.tab .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--amber);margin-left:6px;vertical-align:2px}
+.pbody{padding:16px;display:grid;gap:16px}
+.eyebrow{font:500 11px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+h2{font-family:var(--f-display);font-weight:700;font-size:30px;line-height:1;margin:4px 0 0;letter-spacing:.02em;text-wrap:balance}
+h3{font:600 11.5px var(--f-body);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:0 0 8px}
+p{margin:0}
+.dim{color:var(--dim)}
+.chip{display:inline-flex;align-items:center;gap:6px;font:500 12px var(--f-mono);padding:3px 8px;border:1px solid currentColor;border-radius:2px;margin-top:8px}
+.chip::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;margin:0;font-size:14px}
+.kv dt{color:var(--dim)}
+.kv dd{margin:0;font-family:var(--f-mono);font-variant-numeric:tabular-nums;text-align:right}
+.row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.btn{background:var(--deep);border:1px solid var(--line);color:var(--fg);border-radius:3px;padding:10px 8px;font:500 13.5px var(--f-body);cursor:pointer;display:grid;gap:2px;text-align:center}
+.btn small{font:400 11.5px var(--f-mono);color:var(--dim)}
+.btn:hover:not(:disabled){border-color:var(--amber)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.primary{background:var(--amber);color:var(--amber-ink);border-color:var(--amber);font-weight:600}
+.btn.primary small{color:var(--amber-ink);opacity:.75}
+button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.fleetbox{border:1px solid var(--line);border-radius:3px;padding:12px;display:grid;gap:10px;background:var(--deep)}
+.step{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.step .ctl{display:flex;align-items:center;gap:6px;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.step .ctl button{width:32px;height:32px;border-radius:3px;border:1px solid var(--line);background:var(--panel);color:var(--fg);font-size:17px;cursor:pointer}
+.step .ctl span{min-width:44px;text-align:center}
+.transit{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:14px}
+.forces{display:grid;gap:4px;font-size:14px}
+.forces div{display:flex;justify-content:space-between;gap:10px}
+.forces span:last-child{font-family:var(--f-mono)}
+.tech{border:1px solid var(--line);border-radius:3px;padding:12px;display:grid;gap:8px;background:var(--deep)}
+.tech.on{border-color:var(--amber)}
+.tech .top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.tech .nm{font-family:var(--f-display);font-weight:700;font-size:20px;letter-spacing:.03em}
+.tech .lv{font:500 12px var(--f-mono);color:var(--dim)}
+.bar{height:5px;background:var(--line);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--amber)}
+.stand{display:grid;gap:6px}
+.stand div{display:flex;justify-content:space-between;gap:10px;font-size:14px}
+.stand b{font-weight:500}
+.log{list-style:none;margin:0;padding:0;display:grid;gap:8px;font-size:13.5px}
+.log li{display:grid;grid-template-columns:44px 1fr;gap:8px}
+.log time{font:400 11.5px var(--f-mono);color:var(--dim);padding-top:2px}
+.log .good{color:var(--good)} .log .bad{color:var(--bad)}
+.t-good{color:var(--good)} .t-bad{color:var(--bad)} .t-warn{color:var(--amber)}
+.intel{border:1px solid var(--line);border-radius:3px;padding:12px;background:var(--deep);display:grid;gap:10px}
+.verdict{font-size:14px}
+ul.how{margin:0;padding-left:18px;display:grid;gap:6px;color:var(--dim);font-size:14px}
+.endbar{position:fixed;left:0;right:0;bottom:0;z-index:5;display:flex;justify-content:center;
+  padding-top:22px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  background:linear-gradient(to bottom,rgba(6,8,15,0),var(--void) 45%)}
+.endbtn{width:100%;max-width:520px;background:var(--amber);color:var(--amber-ink);border:0;border-radius:3px;padding:14px;
+  font-family:var(--f-display);font-weight:700;font-size:20px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+.endbtn:disabled{opacity:.5}
+.over{position:fixed;inset:0;z-index:20;background:rgba(6,8,15,.82);display:grid;place-items:center;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.over .card{background:var(--panel);border:1px solid var(--amber);border-radius:4px;padding:24px;max-width:380px;display:grid;gap:14px;text-align:center}
+.over h2{font-size:40px}
+.over .setup{text-align:left;max-width:420px;width:100%;max-height:calc(100% - 32px);overflow-y:auto}
+.setup .field{display:grid;gap:6px}
+.setup label.lbl,.setup legend{font:600 11.5px var(--f-body);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);padding:0}
+.setup input[type=text]{background:var(--deep);border:1px solid var(--line);border-radius:3px;color:var(--fg);font:500 16px var(--f-body);padding:10px 12px;width:100%}
+.setup input[type=text]:focus{outline:2px solid var(--amber);outline-offset:1px}
+.setup fieldset{border:0;margin:0;padding:0;display:grid;gap:8px}
+.swatches{display:flex;flex-wrap:wrap;gap:10px}
+.sw{position:relative;cursor:pointer}
+.sw input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.sw span{display:block;width:36px;height:36px;border-radius:50%;background:var(--c);border:3px solid var(--panel);box-shadow:0 0 0 1px var(--line)}
+.sw input:checked+span{box-shadow:0 0 0 2px var(--fg)}
+.sw input:focus-visible+span{outline:2px solid var(--amber);outline-offset:3px}
+.preview{border:1px solid var(--line);border-radius:3px;padding:12px;background:var(--deep);font-size:14px;display:flex;align-items:center;gap:12px}
+.preview i{flex:none;width:28px;height:28px;border-radius:50%;border:2px solid var(--pc);box-shadow:0 0 14px var(--pc)}
+.setup .acts{display:flex;gap:8px}.setup .acts .btn{flex:1}
+.err{color:var(--bad);font-size:13px}
+.govs{display:grid;gap:6px}
+.opt{position:relative;display:block;cursor:pointer}
+.opt input,.seg input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.opt span{display:grid;gap:2px;border:1px solid var(--line);border-radius:3px;padding:9px 12px;background:var(--deep)}
+.opt span b{font-weight:600;font-size:14px}
+.opt span small{color:var(--dim);font-size:12.5px}
+.opt input:checked+span{border-color:var(--amber);background:var(--panel)}
+.opt input:checked+span b{color:var(--amber)}
+.opt input:focus-visible+span,.seg input:focus-visible+span{outline:2px solid var(--amber);outline-offset:2px}
+.seg{display:flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.seg label{flex:1;position:relative;cursor:pointer;min-width:0}
+.seg span{display:block;text-align:center;padding:9px 4px;font-size:13.5px;color:var(--dim);background:var(--deep)}
+.seg label+label span{border-left:1px solid var(--line)}
+.seg input:checked+span{background:var(--amber);color:var(--amber-ink);font-weight:600}
+.two{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:12px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+canvas{touch-action:none;cursor:grab}
+canvas.dragging{cursor:grabbing}
+.mapctl{position:absolute;right:8px;top:8px;display:grid;gap:6px}
+.banner:not([hidden])~.mapctl{top:58px}
+.mapctl button{width:38px;height:34px;border-radius:3px;border:1px solid var(--line);background:rgba(16,23,42,.92);color:var(--fg);font:600 16px var(--f-mono);cursor:pointer;padding:0}
+.mapctl button.wide{font:600 10px var(--f-body);letter-spacing:.08em;text-transform:uppercase}
+.sum{position:absolute;left:8px;right:8px;bottom:8px;background:rgba(16,23,42,.96);border:1px solid var(--line);border-radius:3px;padding:10px 12px;display:grid;gap:6px;font-size:13.5px;max-height:58%;overflow-y:auto}
+.sum .hd{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.sum .hd b{font-family:var(--f-display);font-size:17px;letter-spacing:.04em}
+.sum ul{margin:0;padding:0;list-style:none;display:grid;gap:4px}
+.sum .nums{font:500 12.5px var(--f-mono);color:var(--dim)}
+.sum .good{color:var(--good)} .sum .bad{color:var(--bad)}
+.rel{border:1px solid var(--line);border-radius:3px;padding:12px;background:var(--deep);display:grid;gap:8px}
+.rel .top{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.rel .nm{font-family:var(--f-display);font-weight:700;font-size:20px;letter-spacing:.03em}
+.pill{font:500 11.5px var(--f-mono);padding:2px 7px;border-radius:2px;border:1px solid currentColor;white-space:nowrap}
+.acts2{display:flex;gap:8px;flex-wrap:wrap}.acts2 .btn{flex:1;min-width:120px}
+.sel{background:var(--deep);color:var(--fg);border:1px solid var(--line);border-radius:3px;padding:8px 10px;font:500 14px var(--f-body);width:100%}
+.sel:focus-visible{outline:2px solid var(--amber);outline-offset:1px}
+.branch{display:grid;gap:6px}
+.node{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid var(--line);border-radius:3px;padding:9px 12px;background:var(--deep);text-align:left;color:var(--fg);font:inherit;width:100%;cursor:pointer}
+.node:hover:not(:disabled){border-color:var(--amber)}
+.node.on{border-color:var(--amber);background:var(--panel)}
+.node:disabled{opacity:.45;cursor:not-allowed}
+.node b{font-weight:600;font-size:14px}
+.node small{display:block;color:var(--dim);font-size:12.5px;margin-top:1px}
+.node .cost{font:500 12px var(--f-mono);color:var(--dim);white-space:nowrap}
+.donelist{display:flex;flex-wrap:wrap;gap:6px}
+.donelist span{font:500 11.5px var(--f-mono);color:var(--good);border:1px solid var(--line);border-radius:2px;padding:2px 7px}
+.leader{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:14px;border:1px solid var(--line);border-radius:3px;padding:10px 12px;background:var(--deep)}
+.leader small{display:block;color:var(--dim);font-size:12.5px}
+.vrow{display:flex;justify-content:space-between;gap:10px;font-size:14px}
+.vrow span:last-child{font-family:var(--f-mono);text-align:right}
+.offer{border:1px solid var(--amber);border-radius:3px;padding:12px;display:grid;gap:8px;background:var(--deep);font-size:14px}
+.tab{letter-spacing:.1em}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand">Dark <span>Galaxy</span></div>
+    <div class="hright">
+      <div class="stats" id="stats"></div>
+      <button class="ghost" id="newBtn" type="button">New galaxy</button>
+    </div>
+  </header>
+  <div class="mapbox" id="mapbox">
+    <canvas id="map" aria-label="Galaxy star chart. Drag to pan, pinch or scroll to zoom."></canvas>
+    <div class="banner" id="banner" hidden><span id="bannerTxt">Tap a destination system</span><button class="ghost" id="cancelT" type="button">Cancel</button></div>
+    <div class="mapctl" id="mapctl">
+      <button type="button" id="zin" aria-label="Zoom in">+</button>
+      <button type="button" id="zout" aria-label="Zoom out">−</button>
+      <button type="button" id="zhome" class="wide" aria-label="Centre on your capital">Home</button>
+      <button type="button" id="zfit" class="wide" aria-label="Show whole galaxy">All</button>
+    </div>
+    <div class="sum" id="sum" hidden></div>
+    <div class="toast" id="toast" hidden></div>
+  </div>
+  <section class="panel">
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" data-tab="sys" id="tab-sys" type="button">System</button>
+      <button class="tab" role="tab" data-tab="res" id="tab-res" type="button">Research</button>
+      <button class="tab" role="tab" data-tab="emp" id="tab-emp" type="button">Empire</button>
+      <button class="tab" role="tab" data-tab="log" id="tab-log" type="button">Reports</button>
+    </div>
+    <div class="pbody" id="pbody"></div>
+  </section>
+</div>
+<div class="endbar"><button class="endbtn" id="endBtn" type="button">End turn</button></div>
+<div class="over" id="over" hidden></div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s);
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function shuffle(arr,R){for(let i=arr.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}return arr}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+/* ---------- game data ---------- */
+const TYPES={
+  terran:{name:'Terran',cap:10,col:'#7cc49a'},
+  ocean:{name:'Ocean',cap:9,col:'#5b93e6'},
+  desert:{name:'Desert',cap:6,col:'#d9a066'},
+  tundra:{name:'Tundra',cap:5,col:'#c9dcef'},
+  barren:{name:'Barren',cap:3,col:'#8d8a9c'},
+  gas:{name:'Gas giant',cap:4,col:'#c393d6'}
+};
+const TYPE_POOL=['terran','ocean','ocean','desert','desert','tundra','tundra','barren','barren','gas','gas'];
+const SPECIAL={ruins:'Precursor ruins · +2 research',rich:'Rich deposits · +3 credits'};
+const NAMES=['Kessa','Varun','Tolle','Mirra','Halcyon','Brin','Corvo','Ishtal','Pellucid','Narre','Ysolde','Thane','Quill','Rhovan','Selk','Umbra','Vantor','Wyre','Zephra','Ardent','Bastion','Caldera','Dross','Ebon','Fallow','Gessen','Hollis','Iver','Jorun','Lusk','Morrow','Oriel','Pyre','Sable','Tessaly','Veil','Ashcombe','Kiran','Lethe','Novar'];
+const SYL_A=['Ka','Ve','Tor','Ish','Mor','Al','Zen','Qua','Bel','Sy','Dra','Lu','Ny','Or','Pra','Rho','Sa','Te','Um','Xa','Ya','Cor','Fen','Gal','Hy','Jun','Kel','Lir','Mae','Nor','Vash','Eri','Osk','Thal'];
+const SYL_B=['ra','nis','dor','th','vex','lia','mon','ris','ka','tos','phe','dan','rion','sa','vel','gar','nox','mir','tis','lon','vane','dris','kor','esh'];
+const SUFFIX=[' Prime',' Minor',' Reach',' Deep',' IX',' Gate'];
+const PLAYER_COLS=[['Amber','#f2b84b'],['Emerald','#5fd08a'],['Azure','#5aa2f5'],['Violet','#b18cf5'],['Rose','#f58cc8'],['Copper','#f5894a'],['Ivory','#e9ecf5']];
+const RIVAL_POOL=['#b18cf5','#5fd08a','#f5894a','#f58cc8','#5aa2f5','#f2b84b','#e9ecf5'];
+const DEFAULT_PLAYER={name:'Solar Ascendancy',cit:'Solarians',col:'#f2b84b',gov:'democracy',size:'medium',shape:'scatter',rivals:2,diff:'normal'};
+const RIVALS=[
+  {name:'the Vesh Hegemony',short:'Vesh',col:'#e45c6a',gov:'junta'},
+  {name:'the Orun Collective',short:'Orun',col:'#4fc3c8',gov:'syndicate'},
+  {name:'the Kael Dominion',short:'Kael',col:null,gov:'democracy'},
+  {name:'the Zhar Directorate',short:'Zhar',col:null,gov:'bureau'},
+  {name:'the Myrr Swarm',short:'Myrr',col:null,gov:'frontier'}
+];
+const PIRATE_META={name:'the Pirates',short:'Pirates',col:'#a8a08f'};
+const GOV={
+  democracy:{name:'Democracy',desc:'+25% research'},
+  syndicate:{name:'Corporate Syndicate',desc:'+20% credits'},
+  junta:{name:'Military Junta',desc:'Frigates cost 15 credits. Start with an extra frigate.'},
+  bureau:{name:'Bureaucracy',desc:'+3 empire capacity'},
+  frontier:{name:'Frontier Collective',desc:'Colony ships cost 20% less. New colonies start at 1 population.'},
+  council:{name:'Provisional Council',desc:'No bonuses'}
+};
+const SIZES={
+  small:{label:'Small',n:18,L:1000,sp:150,limit:120},
+  medium:{label:'Medium',n:26,L:1000,sp:128,limit:150},
+  large:{label:'Large',n:36,L:1000,sp:106,limit:180},
+  huge:{label:'Huge',n:70,L:1500,sp:112,limit:220},
+  massive:{label:'Massive',n:120,L:2000,sp:112,limit:260}
+};
+const SHAPES={scatter:'Scatter',spiral:'Spiral',ring:'Ring',clusters:'Clusters'};
+const DIFF={easy:{label:'Easy',mult:.8,cr:30,atk:14,war:false},normal:{label:'Normal',mult:1,cr:40,atk:8,war:false},hard:{label:'Hard',mult:1.25,cr:60,atk:4,war:true}};
+const SHIPS={
+  frig:{name:'Frigate',pl:'Frigates',ab:'F',cost:20,pow:1,war:true},
+  dd:{name:'Destroyer',pl:'Destroyers',ab:'D',cost:45,pow:2.5,war:true,tech:'hulls'},
+  cv:{name:'Carrier',pl:'Carriers',ab:'C',cost:65,pow:2,war:true,tech:'carriers'},
+  col:{name:'Colony ship',pl:'Colony ships',ab:'c',war:false},
+  sc:{name:'Scout',pl:'Scouts',ab:'s',cost:12,war:false}
+};
+const KEYS=['frig','dd','cv','col','sc'],WAR=['frig','dd','cv'];
+const COST={def:25,yard:70,hub:60,hire:50};
+const CLAIM_TURNS=3,BASE_CAP=6;
+const BLD={
+  mine:{name:'Mine',cost:30,fx:'+4 credits'},
+  lab:{name:'Research lab',cost:35,fx:'+2 research'},
+  habitat:{name:'Habitat',cost:40,fx:'+3 pop room',tech:'habitats'},
+  fortress:{name:'Fortress',cost:40,fx:'+3 defense, max 12',tech:'shields'}
+};
+const ANOM_POOL=['cache','cache','data','data','derelict','beacon','fertile','ambush','ambush'];
+const BRANCHES={mil:'Military',prop:'Propulsion',eco:'Economy',soc:'Society',asc:'Ascension'};
+const TECHS=[
+  {id:'lasers',b:'mil',name:'Laser Batteries',cost:20,req:[],fx:{wpn:1},desc:'+25% warship strength'},
+  {id:'hulls',b:'mil',name:'Heavy Hulls',cost:40,req:['lasers'],desc:'Unlocks Destroyers'},
+  {id:'plasma',b:'mil',name:'Plasma Lances',cost:70,req:['hulls'],fx:{wpn:1},desc:'+25% warship strength'},
+  {id:'carriers',b:'mil',name:'Fleet Carriers',cost:90,req:['hulls'],desc:'Unlocks Carriers'},
+  {id:'antimatter',b:'mil',name:'Antimatter Torpedoes',cost:120,req:['plasma'],fx:{wpn:1},desc:'+25% warship strength'},
+  {id:'ion',b:'prop',name:'Ion Drives',cost:20,req:[],fx:{prop:1},desc:'Scouts +1 jump per turn'},
+  {id:'sensors',b:'prop',name:'Long-range Sensors',cost:40,req:['ion'],desc:'See 2 lanes out from your systems'},
+  {id:'warp',b:'prop',name:'Warp Lanes',cost:70,req:['ion'],fx:{prop:1},desc:'All ships +1 jump per turn'},
+  {id:'gates',b:'prop',name:'Jump Gates',cost:120,req:['warp'],fx:{prop:1},desc:'All ships +1 jump per turn'},
+  {id:'mining',b:'eco',name:'Automated Mining',cost:20,req:[],fx:{ind:1},desc:'+15% credits from population'},
+  {id:'habitats',b:'eco',name:'Orbital Habitats',cost:40,req:['mining'],desc:'Unlocks the Habitat building'},
+  {id:'fusion',b:'eco',name:'Fusion Grids',cost:70,req:['mining'],fx:{ind:1},desc:'+15% credits from population'},
+  {id:'genetics',b:'eco',name:'Gene Crops',cost:70,req:['habitats'],desc:'Population grows 50% faster'},
+  {id:'nanofab',b:'eco',name:'Nanofactories',cost:120,req:['fusion'],fx:{ind:1},desc:'+15% credits from population'},
+  {id:'codes',b:'soc',name:'Civil Codes',cost:20,req:[],fx:{adm:1},desc:'+2 empire capacity'},
+  {id:'shields',b:'soc',name:'Planetary Shields',cost:40,req:['codes'],desc:'Unlocks the Fortress building'},
+  {id:'leadership',b:'soc',name:'Officer Academy',cost:45,req:['codes'],desc:'+1 leader slot'},
+  {id:'xeno',b:'soc',name:'Xenolinguistics',cost:50,req:['codes'],desc:'Rivals warm to you. Trade pays more.'},
+  {id:'senate',b:'soc',name:'Galactic Senate',cost:100,req:['xeno'],fx:{adm:1},desc:'+2 capacity. Shipyards reach 2 lanes.'},
+  {id:'ref_mil',b:'mil',name:'Weapon Refinement',rep:true,req:['antimatter'],fx:{wpn:1},desc:'+25% warship strength'},
+  {id:'ref_prop',b:'prop',name:'Drive Refinement',rep:true,req:['gates'],fx:{prop:1},desc:'+1 jump for every 2 refinements'},
+  {id:'ref_eco',b:'eco',name:'Industrial Refinement',rep:true,req:['nanofab'],fx:{ind:1},desc:'+15% credits from population'},
+  {id:'ref_soc',b:'soc',name:'Administrative Reform',rep:true,req:['senate'],fx:{adm:1},desc:'+2 empire capacity'},
+  {id:'gate',b:'asc',name:'Ascension Gate',cost:320,req:['antimatter','gates','nanofab','senate'],desc:'Completing it wins the game'}
+];
+const TECH=Object.fromEntries(TECHS.map(t=>[t.id,t]));
+const TRAITS={
+  aggressive:{kind:'adm',name:'Aggressive',desc:'+25% fleet strength'},
+  steadfast:{kind:'adm',name:'Steadfast',desc:'Fleet loses 30% fewer ships'},
+  swift:{kind:'adm',name:'Swift',desc:'+1 jump per turn'},
+  industrialist:{kind:'gov',name:'Industrialist',desc:'+30% credits at this colony'},
+  scholar:{kind:'gov',name:'Scholar',desc:'+3 research at this colony'},
+  nurturer:{kind:'gov',name:'Nurturer',desc:'Population grows 50% faster here'},
+  warden:{kind:'gov',name:'Warden',desc:'+3 defense strength at this colony'}
+};
+const FIRST=['Aria','Bren','Cass','Dax','Elin','Faro','Gida','Hale','Iyo','Jex','Kora','Lio','Mira','Nash','Oda','Pell','Quin','Rhea','Soren','Tali','Ulf','Vera','Wen','Xan','Yara','Zed'];
+const LAST=['Vance','Okoro','Strand','Ilves','Marrow','Quell','Haskin','Doran','Sato','Kestrel','Abara','Lindqvist','Rook','Ferro','Ashby','Novak'];
+const SAVE='starlane-dominion-v1';
+const EMP_META=[];
+
+let G=null, vis=[], sel=null, tab='sys', tmode=null, send={}, unread=false, toastT=null, setupOpen=false;
+let cam={x:500,y:500,z:.4}, camReset=true;
+
+/* ---------- galaxy generation ---------- */
+function segX(a,b,c,d){
+  const o=(p,q,r)=>Math.sign((q.x-p.x)*(r.y-p.y)-(q.y-p.y)*(r.x-p.x));
+  return o(a,b,c)!==o(a,b,d)&&o(c,d,a)!==o(c,d,b);
+}
+function genPoints(R,SZ,shape){
+  const L=SZ.L,m=55,pts=[];let sp=SZ.sp,t=0,fails=0;
+  let centres=[];
+  if(shape==='clusters'){const k=Math.max(3,Math.round(SZ.n/9));let g=0;
+    while(centres.length<k&&g<6000){g++;const c={x:L*(.16+.68*R()),y:L*(.16+.68*R())};if(centres.every(o=>Math.hypot(o.x-c.x,o.y-c.y)>L*.26))centres.push(c)}}
+  const arms=L>1200?3:2,rot=R()*Math.PI*2;
+  const gauss=()=>{let u=0;for(let i=0;i<3;i++)u+=R();return(u/3-.5)*2};
+  const sample=()=>{
+    if(shape==='spiral'){const tt=Math.pow(R(),.8),a=Math.floor(R()*arms),th=rot+a*2*Math.PI/arms+tt*3.4,r=40+tt*(L/2-90),sp2=L*.12*(1-tt*.3);
+      return{x:L/2+Math.cos(th)*r+(R()-.5)*sp2,y:L/2+Math.sin(th)*r+(R()-.5)*sp2}}
+    if(shape==='ring'){const th=R()*Math.PI*2,r=L*(.27+.21*R());return{x:L/2+Math.cos(th)*r,y:L/2+Math.sin(th)*r}}
+    if(shape==='clusters'&&centres.length){const c=centres[Math.floor(R()*centres.length)];return{x:c.x+gauss()*L*.17,y:c.y+gauss()*L*.17}}
+    return{x:m+R()*(L-2*m),y:m+R()*(L-2*m)};
+  };
+  while(pts.length<SZ.n&&t<80000){t++;const p=sample();
+    if(p.x<m||p.y<m||p.x>L-m||p.y>L-m)continue;
+    if(pts.every(q=>Math.hypot(q.x-p.x,q.y-p.y)>sp)){pts.push({x:Math.round(p.x),y:Math.round(p.y)});fails=0}
+    else if(++fails>1500){sp*=.92;fails=0}}
+  return pts;
+}
+function genNames(R,n){
+  const out=shuffle(NAMES.slice(),R),set=new Set(out);let g=0;
+  while(out.length<n&&g<20000){g++;const nm=SYL_A[Math.floor(R()*SYL_A.length)]+SYL_B[Math.floor(R()*SYL_B.length)]+(R()<.22?SUFFIX[Math.floor(R()*SUFFIX.length)]:'');
+    if(!set.has(nm)){set.add(nm);out.push(nm)}}
+  return out;
+}
+function bfsAdj(stars,from){const dist=Array(stars.length).fill(-1);dist[from]=0;const q=[from];
+  while(q.length){const a=q.shift();for(const b of stars[a].adj)if(dist[b]<0){dist[b]=dist[a]+1;q.push(b)}}return dist}
+function placeHavens(stars,homes,R,sp){
+  const hd=homes.map(h=>bfsAdj(stars,h));
+  const cand=shuffle(stars.filter(s=>!s.home&&s.owner<0&&homes.every((h,i)=>hd[i][s.id]>=3)),R);
+  const nh=Math.max(1,Math.round(stars.length/14)),hv=[];
+  for(const c of cand){if(hv.length>=nh)break;if(hv.every(h=>Math.hypot(h.x-c.x,h.y-c.y)>sp*2.5))hv.push(c)}
+  hv.forEach(h=>{h.haven=true;h.anom=null});
+}
+function newLeaderPool(R){
+  const kinds=['adm','gov','adm','gov'];const out=[];
+  for(let i=0;i<3;i++){const kind=i===2?(R()<.5?'adm':'gov'):kinds[i];const tr=Object.keys(TRAITS).filter(k=>TRAITS[k].kind===kind);
+    out.push({name:FIRST[Math.floor(R()*FIRST.length)]+' '+LAST[Math.floor(R()*LAST.length)],kind,trait:tr[Math.floor(R()*tr.length)]})}
+  return out;
+}
+function newGame(seed,player){
+  player={...DEFAULT_PLAYER,...(player||{})};
+  const R=mulberry32(seed),SZ=SIZES[player.size]||SIZES.medium,DF=DIFF[player.diff]||DIFF.normal;
+  const nR=clamp(player.rivals|0,1,5),shape=SHAPES[player.shape]?player.shape:'scatter';
+  const pts=genPoints(R,SZ,shape),names=genNames(R,pts.length);
+  const stars=pts.map((p,i)=>{const r=R();return{id:i,x:p.x,y:p.y,name:names[i],type:TYPE_POOL[Math.floor(R()*TYPE_POOL.length)],
+    special:r<.1?'ruins':r<.22?'rich':null,owner:-1,pop:0,def:0,home:false,yard:false,hub:false,pend:null,bld:[],adj:[],gov:null}});
+  const n=stars.length,d=(a,b)=>Math.hypot(stars[a].x-stars[b].x,stars[a].y-stars[b].y),maxLen=SZ.sp*1.85;
+  const edges=[],deg=Array(n).fill(0),key=new Set();
+  const has=(a,b)=>key.has(a<b?a+'-'+b:b+'-'+a);
+  const add=(a,b)=>{edges.push([a,b]);key.add(a<b?a+'-'+b:b+'-'+a);deg[a]++;deg[b]++};
+  const crosses=(a,b)=>edges.some(([c,e])=>c!==a&&c!==b&&e!==a&&e!==b&&segX(stars[a],stars[b],stars[c],stars[e]));
+  const inT=new Set([0]),bestD=Array(n).fill(Infinity),bestF=Array(n).fill(0);
+  for(let b=1;b<n;b++){bestD[b]=d(0,b);bestF[b]=0}
+  while(inT.size<n){let nb=-1,bd=Infinity;for(let b=0;b<n;b++)if(!inT.has(b)&&bestD[b]<bd){bd=bestD[b];nb=b}
+    add(bestF[nb],nb);inT.add(nb);for(let b=0;b<n;b++)if(!inT.has(b)){const dd=d(nb,b);if(dd<bestD[b]){bestD[b]=dd;bestF[b]=nb}}}
+  for(let a=0;a<n;a++){const near=[...Array(n).keys()].filter(b=>b!==a).sort((x,y)=>d(a,x)-d(a,y)).slice(0,3);
+    for(const b of near)if(deg[a]<4&&deg[b]<4&&!has(a,b)&&d(a,b)<maxLen&&!crosses(a,b))add(a,b)}
+  edges.forEach(([a,b])=>{stars[a].adj.push(b);stars[b].adj.push(a)});
+  const far=fn=>{let best=0,bv=-1;for(let i=0;i<n;i++){const v=fn(i);if(v>bv){bv=v;best=i}}return best};
+  const homes=[Math.floor(R()*n)];
+  while(homes.length<1+nR)homes.push(far(i=>Math.min(...homes.map(h=>d(h,i)))));
+  homes[0]=far(i=>Math.min(...homes.slice(1).map(h=>d(h,i))));
+  homes.forEach((h,e)=>{Object.assign(stars[h],{owner:e,pop:6,def:3,home:true,yard:true,type:'terran',special:null});
+    const nb=stars[h].adj.find(b=>!homes.includes(b));if(nb!=null&&stars[nb].type==='barren')stars[nb].type='ocean';});
+  placeHavens(stars,homes,R,SZ.sp);
+  for(const st of stars)if(!st.home&&!st.haven&&R()<.4)st.anom=ANOM_POOL[Math.floor(R()*ANOM_POOL.length)];
+  const govs=homes.map((h,e)=>e===0?(GOV[player.gov]?player.gov:'democracy'):RIVALS[e-1].gov);
+  const N=homes.length;
+  const emp=homes.map((h,e)=>({gov:govs[e],credits:e===0?40:DF.cr,tech:{wpn:0,prop:0,ind:0,adm:0},done:{},rep:{},prog:{},focus:null,alive:true}));
+  emp.push({pirate:true,gov:'council',credits:0,tech:{wpn:0,prop:0,ind:0,adm:0},done:{},rep:{},prog:{},focus:null,alive:true});
+  const rel=[...Array(N)].map((_,a)=>[...Array(N)].map((_,b)=>a===b?null:(DF.war?'war':'peace')));
+  const att=[...Array(N)].map((_,a)=>[...Array(N)].map((_,b)=>a!==b&&govs[a]===govs[b]?10:0));
+  G={v:2,seed,turn:1,world:SZ.L,size:player.size,shape,stars,edges,nid:20,over:null,log:[],player,diff:player.diff,
+    emp,fleets:[],seen:stars.map(()=>false),known:stars.map(()=>-1),rel,relT:rel.map(r=>r.map(()=>0)),att,offers:[],asked:{},
+    leaders:[],pool:newLeaderPool(R),poolT:1,lid:1,limit:SZ.limit,techWin:null,sum:null};
+  homes.forEach((h,e)=>G.fleets.push({id:e+1,owner:e,at:h,path:[],frig:2+(govs[e]==='junta'?1:0),dd:0,cv:0,col:1,sc:e===0?1:0,colTarget:null,adm:null}));
+  stars.filter(s=>s.haven).forEach(h=>G.fleets.push({id:G.nid++,owner:N,at:h.id,path:[],frig:2,dd:0,cv:0,col:0,sc:0,colTarget:null,adm:null}));
+  emp.forEach((E,e)=>{if(!E.pirate)E.focus=pickTech(e,true)});
+  sel=homes[0];tmode=null;camReset=true;applyMeta();
+  updateVis();
+  addLog(`${stars[homes[0]].name} is the homeworld of the ${G.player.cit}. Grow, settle nearby systems and investigate anomalies (marked ?). Beware pirate havens.`,'info');
+  resetSend();save();
+}
+function applyMeta(){
+  const P=G.player||DEFAULT_PLAYER,used=[P.col];
+  EMP_META.length=0;EMP_META.push({name:P.name,short:'You',col:P.col});
+  for(let i=1;i<NE();i++){const r=RIVALS[i-1];const col=r.col||RIVAL_POOL.find(c=>!used.includes(c))||'#cccccc';used.push(col);EMP_META.push({name:r.name,short:r.short,col})}
+  EMP_META.push(PIRATE_META);
+}
+
+/* ---------- core helpers ---------- */
+function NE(){return G.emp.length-(G.emp[G.emp.length-1].pirate?1:0)}
+function PIR(){return G.emp.length-1}
+const isPir=e=>e>=0&&!!(G.emp[e]&&G.emp[e].pirate);
+const realE=()=>[...Array(NE()).keys()];
+const ename=e=>EMP_META[e]?EMP_META[e].name:'someone';
+const capName=e=>{const n=ename(e);return n[0].toUpperCase()+n.slice(1)};
+function addLog(msg,tone){G.log.unshift({t:G.turn,msg,tone});if(G.log.length>120)G.log.length=120;}
+function bfs(from){const n=G.stars.length,dist=Array(n).fill(-1),prev=Array(n).fill(-1);dist[from]=0;const q=[from];
+  while(q.length){const a=q.shift();for(const b of G.stars[a].adj)if(dist[b]<0){dist[b]=dist[a]+1;prev[b]=a;q.push(b)}}return{dist,prev}}
+function pathTo(from,to){const{prev}=bfs(from);const p=[];let c=to;while(c!==from&&c>=0){p.unshift(c);c=prev[c]}return c===from?p:null}
+const fmtN=n=>Number.isInteger(n)?String(n):n.toFixed(1);
+const r1=n=>fmtN(Math.round(n*10)/10);
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const plural=(n,w,p)=>`${n} ${n===1?w:(p||w+'s')}`;
+
+const ships=f=>KEYS.reduce((a,k)=>a+(f[k]||0),0);
+const warships=f=>(f.frig||0)+(f.dd||0)+(f.cv||0);
+const leaderById=id=>id?G.leaders.find(l=>l.id===id):null;
+function fleetPow(e,f){
+  const base=(f.frig||0)*SHIPS.frig.pow+(f.dd||0)*SHIPS.dd.pow+(f.cv||0)*SHIPS.cv.pow;if(!base)return 0;
+  let m=(1+.25*G.emp[e].tech.wpn)*(1+.2*Math.min(3,f.cv||0));
+  const L=leaderById(f.adm);if(L&&L.trait==='aggressive')m*=1.25;
+  return base*m;
+}
+const powSum=(e,fs)=>fs.reduce((a,f)=>a+fleetPow(e,f),0);
+const milPow=e=>powSum(e,G.fleets.filter(f=>f.owner===e));
+function speed(f){
+  const E=G.emp[f.owner],slow=warships(f)+(f.col||0)>0;
+  let s=(slow?1:2)+(E.done.warp?1:0)+(E.done.gates?1:0)+(!slow&&E.done.ion?1:0)+Math.floor((E.rep.ref_prop||0)/2)+Math.floor((E.legacyProp||0)/2);
+  const L=leaderById(f.adm);if(L&&L.trait==='swift')s+=1;return s;
+}
+function fleetText(f,short){
+  const parts=[];
+  for(const k of KEYS)if(f[k])parts.push(short?`${f[k]}${SHIPS[k].ab}`:plural(f[k],SHIPS[k].name.toLowerCase(),SHIPS[k].pl.toLowerCase()));
+  return parts.join(short?' ':', ')||'no ships';
+}
+const hasB=(s,k)=>!!(s.bld&&s.bld.includes(k));
+const govL=s=>s.gov?leaderById(s.gov):null;
+const cap=s=>TYPES[s.type].cap+(s.capB||0)+(hasB(s,'habitat')?3:0);
+const defMax=s=>hasB(s,'fortress')?12:8;
+const slots=s=>s.pop>=5?2:1;
+const govOf=e=>GOV[G.emp[e].gov]?G.emp[e].gov:'council';
+const done=(e,id)=>!!G.emp[e].done[id];
+const starStr=s=>{let v=s.def*1.5+s.pop*.25;const L=govL(s);if(L&&L.trait==='warden')v+=3;return v};
+const sysCount=e=>G.stars.filter(s=>s.owner===e).length;
+const colCost=e=>Math.round((25+5*sysCount(e))*(govOf(e)==='frontier'?.8:1));
+const claimCost=e=>10+4*sysCount(e);
+const hubCount=e=>G.stars.filter(s=>s.owner===e&&s.hub&&s.pop>0).length;
+const maxHubs=e=>Math.floor(sysCount(e)/5);
+function costOf(e,k){
+  if(k==='col')return colCost(e);
+  if(k==='frig')return govOf(e)==='junta'?15:SHIPS.frig.cost;
+  if(SHIPS[k])return SHIPS[k].cost;
+  if(BLD[k])return BLD[k].cost;
+  return COST[k];
+}
+function unlocked(e,k){const t=(SHIPS[k]&&SHIPS[k].tech)||(BLD[k]&&BLD[k].tech);return !t||done(e,t)}
+
+/* Influence: a shipyard gives 2 to its system and 1 to each neighbour (Galactic Senate adds 0.5 two lanes out). -2 = contested. */
+function control(){
+  const n=G.stars.length,inf=G.emp.map(()=>new Float32Array(n));
+  for(const s of G.stars)if(s.owner>=0&&s.yard&&s.pop>0){const e=s.owner,sen=done(e,'senate');inf[e][s.id]+=2;
+    for(const b of s.adj){inf[e][b]+=1;if(sen)for(const c of G.stars[b].adj)if(c!==s.id)inf[e][c]+=.5}}
+  return G.stars.map(s=>{
+    if(s.owner>=0)return s.owner;
+    let best=-1,bv=0,tie=false;
+    for(let e=0;e<inf.length;e++){const v=inf[e][s.id];if(v>bv){bv=v;best=e;tie=false}else if(v>0&&v===bv)tie=true}
+    return tie?-2:best;
+  });
+}
+function sprawl(e){
+  let use=0;for(const s of G.stars)if(s.owner===e)use+=s.pop>0?1:.5;
+  const cap=BASE_CAP+2*G.emp[e].tech.adm+3*hubCount(e)+(govOf(e)==='bureau'?3:0),over=Math.max(0,use-cap);
+  return{use,cap,over,pen:Math.min(.6,.05*over)};
+}
+function claimSource(e,id){
+  return G.stars.find(y=>y.owner===e&&y.yard&&y.pop>0&&(y.id===id||y.adj.includes(id))&&!G.stars.some(s=>s.pend&&s.pend.y===y.id))||null;
+}
+function starOut(s,e){
+  const E=G.emp[e];let c=s.pop*1.5*(1+.15*E.tech.ind),r=1;
+  if(s.home)r+=2;if(s.special==='ruins')r+=2;if(s.special==='rich')c+=3;
+  if(hasB(s,'mine'))c+=4;if(hasB(s,'lab'))r+=2;
+  const L=govL(s);if(L&&L.trait==='industrialist')c*=1.3;if(L&&L.trait==='scholar')r+=3;
+  return{c,r};
+}
+const tradePartners=e=>realE().filter(x=>x!==e&&G.emp[x].alive&&G.rel[e][x]==='trade').length;
+function incMult(e){
+  const g=govOf(e),m=e===0?1:(DIFF[G.diff]||DIFF.normal).mult;
+  const trade=1+Math.min(3,tradePartners(e))*(done(e,'xeno')?.15:.1);
+  return{c:(g==='syndicate'?1.2:1)*m*trade,r:(g==='democracy'?1.25:1)*m};
+}
+function income(e){
+  if(isPir(e))return{c:0,r:0,pen:0};
+  let c=2,r=1;
+  for(const s of G.stars)if(s.owner===e&&s.pop>0){const o=starOut(s,e);c+=o.c;r+=o.r;}
+  const m=incMult(e),pen=sprawl(e).pen;
+  return{c:Math.floor(c*m.c*(1-pen)),r:Math.max(1,Math.round(r*m.r*(1-pen))),pen};
+}
+function growth(s){
+  let g=(s.pop<2?.1:.2)+(s.home?.1:0);
+  if(done(s.owner,'genetics'))g*=1.5;
+  const L=govL(s);if(L&&L.trait==='nurturer')g*=1.5;
+  return g;
+}
+
+/* ---------- diplomacy ---------- */
+function atWar(a,b){
+  if(a===b||a<0||b<0)return false;
+  if(isPir(a)||isPir(b))return true;
+  return G.rel[a][b]==='war';
+}
+const relOf=(a,b)=>G.rel[a][b];
+const relAge=(a,b)=>G.turn-G.relT[a][b];
+function setRel(a,b,st){G.rel[a][b]=G.rel[b][a]=st;G.relT[a][b]=G.relT[b][a]=G.turn;G.offers=G.offers.filter(o=>!((o.from===a&&o.to===b)||(o.from===b&&o.to===a)))}
+function attLabel(v){return v>30?'Friendly':v>5?'Cordial':v>-15?'Neutral':v>-40?'Wary':'Hostile'}
+function bumpAtt(a,b,d){if(a===b||isPir(a)||isPir(b))return;G.att[a][b]=clamp(G.att[a][b]+d,-100,100)}
+const TREATY=5;
+function declareWar(a,b){
+  setRel(a,b,'war');bumpAtt(b,a,-30);
+  for(const x of realE())if(x!==a&&x!==b)bumpAtt(x,a,-5);
+  if(a===0)addLog(`You declared war on ${ename(b)}.`,'bad');
+  else if(b===0)addLog(`${capName(a)} declared war on you!`,'bad');
+  else addLog(`${capName(a)} declared war on ${ename(b)}.`,'info');
+}
+function makePeace(a,b){
+  setRel(a,b,'peace');bumpAtt(a,b,5);bumpAtt(b,a,5);
+  G.fleets.forEach(f=>{if((f.owner===a||f.owner===b)&&f.path.length){const dst=G.stars[f.path[f.path.length-1]];if(dst.owner===(f.owner===a?b:a)){f.path=[];}}});
+  addLog(a===0||b===0?`Peace signed with ${ename(a===0?b:a)}.`:`${capName(a)} and ${ename(b)} signed a peace treaty.`,a===0||b===0?'good':'info');
+}
+function aiAcceptsPeace(x,from){return relAge(x,from)>=4&&(G.att[x][from]>-35||milPow(x)<milPow(from)*.9)}
+function aiAcceptsTrade(x,from){return relAge(x,from)>=3&&G.att[x][from]>(done(from,'xeno')?-5:5)}
+
+/* ---------- research ---------- */
+function techCost(e,t){return t.rep?80+40*(G.emp[e].rep[t.id]||0):t.cost}
+function canResearch(e,t){const E=G.emp[e];if(!t.rep&&E.done[t.id])return false;return t.req.every(r=>E.done[r])}
+function availTech(e){return TECHS.filter(t=>canResearch(e,t))}
+function techsDone(e){const E=G.emp[e];return Object.keys(E.done).length+Object.values(E.rep).reduce((a,b)=>a+b,0)}
+function pickTech(e,first){
+  const av=availTech(e);if(!av.length)return null;
+  if(e===0)return av.filter(t=>!t.rep).sort((a,b)=>techCost(e,a)-techCost(e,b))[0]?.id||av[0].id;
+  const sp=sprawl(e);if(av.some(t=>t.id==='gate')&&Math.random()<.6)return 'gate';
+  const w={mil:.38,eco:.3,prop:.14,soc:.18,asc:.5};
+  if(sp.use>=sp.cap-1)w.soc=.8;
+  const g=govOf(e);if(g==='junta')w.mil+=.2;if(g==='syndicate')w.eco+=.2;if(g==='bureau')w.soc+=.2;
+  let best=null,bv=-1;
+  for(const t of av){const v=w[t.b]*(t.rep?.6:1)*(.6+Math.random()*.8)/Math.sqrt(techCost(e,t));if(v>bv){bv=v;best=t}}
+  return best?best.id:null;
+}
+function completeTech(e,t){
+  const E=G.emp[e];
+  if(t.rep)E.rep[t.id]=(E.rep[t.id]||0)+1;else E.done[t.id]=true;
+  if(t.fx)for(const k in t.fx)E.tech[k]+=t.fx[k];
+  if(t.id==='xeno')for(const x of realE())if(x!==e)bumpAtt(x,e,15);
+  if(t.id==='gate')G.techWin=e;
+  if(e===0)addLog(`Research complete: ${t.name}. ${t.desc}.`,'good');
+  else if(t.id==='gate')addLog(`${capName(e)} completed the Ascension Gate.`,'bad');
+}
+function addResearch(e,pts){
+  const E=G.emp[e];if(!E.focus||!TECH[E.focus]||!canResearch(e,TECH[E.focus]))E.focus=pickTech(e);
+  let carry=pts,guard=0;
+  while(E.focus&&carry>0&&guard<10){guard++;
+    const t=TECH[E.focus];E.prog[t.id]=(E.prog[t.id]||0)+carry;carry=0;const c=techCost(e,t);
+    if(E.prog[t.id]>=c){carry=E.prog[t.id]-c;E.prog[t.id]=0;completeTech(e,t);
+      if(!(t.rep&&e===0))E.focus=pickTech(e);
+      if(e===0&&E.focus&&E.focus!==t.id)addLog(`Now researching ${TECH[E.focus].name}.`,'info');}
+  }
+}
+
+/* ---------- leaders ---------- */
+const leaderSlots=()=>1+Math.floor(sysCount(0)/4)+(done(0,'leadership')?1:0);
+function leaderPlace(L){
+  if(L.kind==='adm'){const f=G.fleets.find(f=>f.adm===L.id);return f?{f}:null}
+  const s=G.stars.find(s=>s.gov===L.id);return s?{s}:null;
+}
+function unassign(id){G.fleets.forEach(f=>{if(f.adm===id)f.adm=null});G.stars.forEach(s=>{if(s.gov===id)s.gov=null})}
+function leaderLost(id,why){
+  const L=leaderById(id);if(!L)return;unassign(id);G.leaders=G.leaders.filter(l=>l.id!==id);
+  addLog(`${L.kind==='adm'?'Admiral':'Governor'} ${L.name} ${why}.`,'bad');
+}
+function hire(i){
+  const c=G.pool[i];if(!c||G.emp[0].credits<COST.hire||G.leaders.length>=leaderSlots())return false;
+  G.emp[0].credits-=COST.hire;G.leaders.push({id:G.lid++,name:c.name,kind:c.kind,trait:c.trait});G.pool.splice(i,1);return true;
+}
+
+/* ---------- actions ---------- */
+function mergeFleets(){
+  const keep=[],map={};
+  for(const f of G.fleets){
+    if(ships(f)<=0){if(f.adm&&f.owner===0)leaderLost(f.adm,'was lost with the fleet');continue}
+    if(f.path.length){keep.push(f);continue}
+    const k=f.owner+':'+f.at;
+    if(map[k]){const m=map[k];for(const key of KEYS)m[key]=(m[key]||0)+(f[key]||0);
+      if(f.colTarget!=null)m.colTarget=f.colTarget;
+      if(f.adm){if(m.adm)f.adm=null;else m.adm=f.adm}}
+    else{map[k]=f;keep.push(f)}
+  }
+  G.fleets=keep;
+}
+function build(e,starId,kind){
+  const E=G.emp[e],c=costOf(e,kind),s=G.stars[starId];
+  if(E.credits<c||s.owner!==e||s.pop<=0)return false;
+  if(!unlocked(e,kind))return false;
+  if(kind==='def'&&s.def>=defMax(s))return false;
+  if(BLD[kind]&&(hasB(s,kind)||(s.bld||[]).length>=slots(s)))return false;
+  if(kind==='yard'&&s.yard)return false;
+  if(kind==='col'&&s.pop<3)return false;
+  if(kind==='hub'&&(s.hub||s.pop<5||hubCount(e)>=maxHubs(e)))return false;
+  if(SHIPS[kind]&&!s.yard)return false;
+  E.credits-=c;
+  if(kind==='def')s.def+=1;
+  else if(kind==='yard')s.yard=true;
+  else if(kind==='hub')s.hub=true;
+  else if(BLD[kind]){(s.bld=s.bld||[]).push(kind);if(kind==='fortress')s.def=Math.min(12,s.def+3);}
+  else{if(kind==='col')s.pop=Math.round((s.pop-1)*100)/100;
+    G.fleets.push({id:G.nid++,owner:e,at:starId,path:[],frig:0,dd:0,cv:0,col:0,sc:0,[kind]:1,colTarget:null,adm:null});mergeFleets();}
+  return true;
+}
+function claim(e,id){
+  const s=G.stars[id],E=G.emp[e],c=claimCost(e),y=claimSource(e,id);
+  if(s.owner>=0||s.pend||s.haven||!y||control()[id]!==e||E.credits<c)return false;
+  E.credits-=c;s.pend={o:e,t:CLAIM_TURNS,y:y.id};
+  if(e!==0&&vis[id])addLog(`${capName(e)} began claiming ${s.name}.`,'info');
+  return true;
+}
+function order(f,dest,n){
+  const tot=KEYS.reduce((a,k)=>a+(n[k]||0),0);
+  if(dest===f.at||tot<=0)return null;
+  const p=pathTo(f.at,dest);if(!p)return null;
+  let nf=f;
+  if(KEYS.some(k=>(n[k]||0)!==(f[k]||0))){
+    nf={id:G.nid++,owner:f.owner,at:f.at,path:[],frig:0,dd:0,cv:0,col:0,sc:0,colTarget:null,adm:null};
+    for(const k of KEYS){const v=Math.min(n[k]||0,f[k]||0);f[k]-=v;nf[k]=v}
+    if(f.adm&&warships(nf)>0){nf.adm=f.adm;f.adm=null}
+    G.fleets.push(nf);
+  }
+  nf.path=p;const ds=G.stars[dest];
+  nf.colTarget=(nf.col>0&&!ds.haven&&(ds.owner<0||(ds.owner===f.owner&&ds.pop<=0)))?dest:null;
+  return nf;
+}
+function investigate(s,f){
+  const e=f.owner,E=G.emp[e],k=s.anom;s.anom=null;let msg='',tone='good';
+  if(k==='cache'){E.credits+=40;msg='found a derelict supply cache: +40 credits'}
+  else if(k==='data'){addResearch(e,15);msg='recovered precursor data: +15 research'}
+  else if(k==='derelict'){f.frig+=1;msg='restored a derelict frigate, which joins the fleet'}
+  else if(k==='beacon'){if(e===0){const{dist}=bfs(s.id);G.stars.forEach(t=>{if(dist[t.id]>=0&&dist[t.id]<=2){G.seen[t.id]=true;G.known[t.id]=t.owner}})}msg='activated an ancient beacon that charts every system within 2 lanes'}
+  else if(k==='fertile'){s.capB=(s.capB||0)+3;msg=`found ${s.name} unusually fertile: +3 population room`}
+  else if(k==='ambush'){tone='bad';for(const kk of ['sc','col','frig','dd','cv'])if(f[kk]>0){f[kk]--;break}msg='ran into a pirate ambush and lost a ship'}
+  if(e===0)addLog(`Your ships at ${s.name} ${msg}.`,tone);
+}
+
+/* ---------- combat ---------- */
+function takeLosses(f,hull){
+  let rem=hull;
+  while(rem>0&&warships(f)>0){if(f.frig>0){f.frig--;rem-=1}else if(f.dd>0){f.dd--;rem-=2}else{f.cv--;rem-=2}}
+}
+function resolveCombat(s){
+  const here=G.fleets.filter(f=>f.at===s.id&&ships(f)>0);
+  const all=new Set(here.map(f=>f.owner));if(s.owner>=0)all.add(s.owner);
+  const owners=[...all].filter(o=>[...all].some(o2=>atWar(o,o2)));
+  if(owners.length<2)return;
+  const side=owners.map(o=>{const fs=here.filter(f=>f.owner===o);let st=powSum(o,fs);if(o===s.owner)st+=starStr(s);
+    return{o,fs,st,n:fs.reduce((a,f)=>a+ships(f),0)}});
+  if(side.reduce((a,x)=>a+x.st,0)<=0)return;
+  side.sort((a,b)=>(b.st-a.st)||(a.o===s.owner?-1:b.o===s.owner?1:0));
+  const w=side[0],others=side.slice(1),os=others.reduce((a,x)=>a+x.st,0);
+  const frac=Math.min(1,os/Math.max(w.st,.01)*(.5+Math.random()*.35));
+  let lost=0;
+  for(const f of w.fs){const L=leaderById(f.adm);const hull=f.frig+2*f.dd+2*f.cv;const before=ships(f);
+    takeLosses(f,Math.round(hull*frac*(L&&L.trait==='steadfast'?.7:1)));lost+=before-ships(f)}
+  const destroyed=others.reduce((a,x)=>a+x.n,0);
+  const pirHull=others.filter(x=>isPir(x.o)).reduce((a,x)=>a+x.fs.reduce((b,f)=>b+f.frig+2*f.dd+2*f.cv,0),0);
+  for(const x of others)for(const f of x.fs)for(const k of KEYS)f[k]=0;
+  const prev=s.owner,winWar=w.fs.reduce((a,f)=>a+warships(f),0);let captured=false,raided=false;
+  if(s.owner>=0&&w.o!==s.owner&&atWar(w.o,s.owner)){
+    if(winWar>0&&isPir(w.o)){raided=true;const E=G.emp[s.owner],take=Math.min(E.credits,10+5*winWar);E.credits-=take;
+      s.pop=Math.max(s.pop>0?.5:0,Math.round(s.pop*.85*100)/100);s.def=Math.max(0,s.def-1);
+      if(prev===0)addLog(`Pirates raided ${s.name}, stole ${take} credits and killed some of the population.`,'bad');}
+    else if(winWar>0){
+      if(s.gov){const gl=leaderById(s.gov);if(gl)leaderLost(s.gov,`was captured at ${s.name}`)}
+      s.owner=w.o;s.pop=s.pop>0?Math.max(1,Math.round(s.pop*6)/10):0;s.def=0;s.yard=false;s.hub=false;s.pend=null;captured=true;}
+    else s.def=Math.max(0,s.def-2);
+  }else if(w.o===s.owner&&frac>.5)s.def=Math.max(0,s.def-1);
+  if(pirHull>0&&!isPir(w.o)){const bounty=8*pirHull+(s.haven&&!G.fleets.some(f=>f.at===s.id&&isPir(f.owner)&&ships(f)>0)?30:0);
+    G.emp[w.o].credits+=bounty;
+    if(s.haven){s.haven=false;if(w.o===0)addLog(`Pirate haven at ${s.name} destroyed. Bounty: ${bounty} credits.`,'good');else if(vis[s.id])addLog(`${capName(w.o)} destroyed the pirate haven at ${s.name}.`,'info')}
+    else if(w.o===0)addLog(`Pirates defeated at ${s.name}. Bounty: ${bounty} credits.`,'good');}
+  const pl=n=>plural(n,'ship');
+  if(owners.includes(0)&&!raided){
+    if(w.o===0){
+      if(captured)addLog(`Captured ${s.name} from ${ename(prev)}. Lost ${pl(lost)}, destroyed ${pl(destroyed)}.`,'good');
+      else if(!pirHull)addLog(`Won the battle at ${s.name}. Lost ${pl(lost)}, destroyed ${pl(destroyed)}.`,'good');
+    }else{
+      if(prev===0&&captured)addLog(`${s.name} fell to ${ename(w.o)}.`,'bad');
+      else{const ps=side.find(x=>x.o===0);addLog(`Battle lost at ${s.name} against ${ename(w.o)}. ${pl(ps?ps.n:0)} destroyed.`,'bad');}
+    }
+  }else if(vis[s.id]&&!raided&&captured){addLog(`${s.name} was taken by ${ename(w.o)} from ${ename(prev)}.`,'info');}
+}
+
+/* ---------- pirates ---------- */
+function pirateTurn(){
+  const P=PIR(),S=G.stars;
+  if(G.turn>=20&&G.turn%25===0){
+    const owned=S.filter(s=>s.owner>=0).map(s=>s.id),dmin=S.map(()=>99);
+    for(const o of owned){const{dist}=bfs(o);dist.forEach((d,i)=>{if(d>=0&&d<dmin[i])dmin[i]=d})}
+    const c=S.filter(s=>s.owner<0&&!s.haven&&!s.pend&&dmin[s.id]>=2&&!G.fleets.some(f=>f.at===s.id)).sort((a,b)=>dmin[b.id]-dmin[a.id])[0];
+    if(c){c.haven=true;c.anom=null;G.fleets.push({id:G.nid++,owner:P,at:c.id,path:[],frig:2+Math.floor(G.turn/15),dd:0,cv:0,col:0,sc:0,colTarget:null,adm:null});
+      if(G.seen[c.id])addLog(`Pirates set up a new haven at ${c.name}.`,'bad');}
+  }
+  const havens=S.filter(s=>s.haven&&s.owner<0);
+  if(G.turn>=8&&G.turn%7===0){
+    const pf=G.fleets.filter(f=>f.owner===P).length;
+    for(const h of havens)if(pf<havens.length*2+1){
+      const n=Math.min(9,1+Math.floor(G.turn/12));
+      G.fleets.push({id:G.nid++,owner:P,at:h.id,path:[],frig:n,dd:G.turn>45?Math.floor(G.turn/45):0,cv:0,col:0,sc:0,colTarget:null,adm:null});
+      if(vis[h.id])addLog(`A pirate raiding party gathered at ${h.name}.`,'bad');}
+    mergeFleets();
+  }
+  for(const f of G.fleets){
+    if(f.owner!==P||f.path.length||!warships(f))continue;
+    const here=S[f.at];
+    if(here.haven){
+      if(Math.random()>.45)continue;
+      const{dist}=bfs(f.at);const my=fleetPow(P,f);let best=null,bv=-1e9;
+      for(const s of S)if(s.owner>=0&&s.pop>0&&dist[s.id]>0&&dist[s.id]<=5){
+        const def=starStr(s)+powSum(s.owner,G.fleets.filter(g=>g.at===s.id&&g.owner===s.owner));
+        if(my>def*1.15){const v=s.pop-dist[s.id]*1.5+(s.owner===0?1:0);if(v>bv){bv=v;best=s}}}
+      if(best){const keep=Math.floor(f.frig/3);order(f,best.id,{frig:f.frig-keep,dd:f.dd,cv:0});}
+    }else{
+      const{dist}=bfs(f.at);const h=havens.slice().sort((a,b)=>dist[a.id]-dist[b.id])[0];
+      if(h)order(f,h.id,{frig:f.frig,dd:f.dd,cv:f.cv});
+    }
+  }
+}
+
+/* ---------- AI ---------- */
+function borders(){
+  const n=NE(),b=[...Array(n)].map(()=>Array(n).fill(false));
+  for(const s of G.stars)if(s.owner>=0&&!isPir(s.owner))for(const a of s.adj){const o=G.stars[a].owner;if(o>=0&&o!==s.owner&&!isPir(o))b[s.owner][o]=true}
+  return b;
+}
+function aiDiplo(e,bd){
+  const DF=DIFF[G.diff]||DIFF.normal,counts=realE().map(x=>G.emp[x].alive?sysCount(x):0),maxC=Math.max(...counts);
+  for(const x of realE()){
+    if(x===e||!G.emp[x].alive)continue;
+    const st=relOf(e,x);let d=st==='war'?-.1:st==='trade'?.8:.3;
+    if(bd[e][x])d-=govOf(e)==='junta'?1.4:1;
+    if(counts[x]===maxC&&counts[x]>1.3*counts[e]&&counts[x]>=6)d-=.8;
+    if(govOf(e)===govOf(x))d+=.15;
+    bumpAtt(e,x,d+(Math.random()-.5)*.4);
+    const a=G.att[e][x],me=milPow(e),them=milPow(x);
+    if(st==='war'&&relAge(e,x)>=6&&(me<them*.75||a>5)&&Math.random()<.3){
+      if(x===0){if(!G.offers.some(o=>o.from===e))G.offers.push({from:e,to:0,type:'peace',t:G.turn});}
+      else if(aiAcceptsPeace(x,e)&&Math.random()<.6)makePeace(e,x);
+    }else if(st==='peace'&&relAge(e,x)>=8&&G.turn>=DF.atk&&bd[e][x]&&(
+        (a<(G.diff==='hard'?-5:-12)&&me>=them*.85&&Math.random()<.25)||
+        (a<10&&me>=them*2.2&&me>8&&relAge(e,x)>=12&&Math.random()<(G.diff==='easy'?.04:.09)))){
+      declareWar(e,x);
+    }else if(st==='peace'&&relAge(e,x)>=TREATY&&a>20&&Math.random()<.12){
+      if(x===0){if(!G.offers.some(o=>o.from===e))G.offers.push({from:e,to:0,type:'trade',t:G.turn});}
+      else if(aiAcceptsTrade(x,e)){setRel(e,x,'trade');}
+    }
+  }
+}
+function aiTurn(e){
+  const E=G.emp[e],S=G.stars;
+  const mine=S.filter(s=>s.owner===e&&s.pop>0);if(!mine.length)return;
+  const ctl=control(),sp=sprawl(e);
+  if(E.credits>=claimCost(e)+10&&sp.use<sp.cap+1&&Math.random()<.6){const cl=S.filter(s=>s.owner<0&&!s.pend&&!s.haven&&ctl[s.id]===e&&claimSource(e,s.id)).sort((a,b)=>cap(b)-cap(a))[0];if(cl)claim(e,cl.id);}
+  if(!E.focus||!TECH[E.focus]||!canResearch(e,TECH[E.focus]))E.focus=pickTech(e);
+  const enemyAdj=s=>s.adj.some(b=>{const o=S[b].owner;return o>=0&&o!==e&&atWar(e,o)});
+  const border=mine.filter(s=>s.adj.some(b=>S[b].owner!==e));
+  const threat=mine.filter(enemyAdj);
+  const targeted=new Set(G.fleets.filter(f=>f.colTarget!=null).map(f=>f.colTarget));
+  const free=S.filter(s=>(s.owner<0||(s.owner===e&&s.pop<=0))&&!s.haven&&!targeted.has(s.id));
+  let colN=G.fleets.filter(f=>f.owner===e).reduce((a,f)=>a+f.col,0);
+  const yards=mine.filter(s=>s.yard);
+  const yardAt=()=>(yards.find(s=>threat.includes(s))||yards.find(s=>border.includes(s))||yards[0]);
+  const warPick=()=>unlocked(e,'cv')&&Math.random()<.22?'cv':unlocked(e,'dd')&&Math.random()<.45?'dd':'frig';
+  for(let g=0;g<14;g++){
+    if((!yards.length||(yards.length<1+Math.floor(mine.length/3)&&Math.random()<.3))&&E.credits>=COST.yard){
+      const c=mine.filter(s=>!s.yard).sort((a,b)=>(border.includes(b)-border.includes(a))||(b.pop-a.pop))[0];
+      if(c&&build(e,c.id,'yard')){yards.push(c);continue}}
+    if(!yards.length)break;
+    if(sp.use>sp.cap-1&&E.credits>=COST.hub){const c=mine.find(s=>!s.hub&&s.pop>=5);if(c&&build(e,c.id,'hub'))continue}
+    if(colN<2&&free.length>colN&&mine.length<14&&sp.use<sp.cap+2&&E.credits>=colCost(e)){const y=yards.filter(s=>s.pop>=3).sort((a,b)=>b.pop-a.pop)[0];if(y&&build(e,y.id,'col')){colN++;continue}}
+    if(threat.length&&E.credits>=COST.def&&Math.random()<.22){const s=threat[Math.floor(Math.random()*threat.length)];if(s.def<6&&build(e,s.id,'def'))continue}
+    if(E.credits>=70&&Math.random()<.3){const c=mine.find(s=>(s.bld||[]).length<slots(s));
+      if(c){const opts=[];if(c.pop>=cap(c)-1&&unlocked(e,'habitat')&&!hasB(c,'habitat'))opts.push('habitat');if(threat.includes(c)&&unlocked(e,'fortress')&&!hasB(c,'fortress'))opts.push('fortress');
+        if(!hasB(c,'mine'))opts.push('mine');if(!hasB(c,'lab'))opts.push('lab');const k=opts[0]==='habitat'||opts[0]==='fortress'?opts[0]:opts[Math.floor(Math.random()*opts.length)];
+        if(k&&build(e,c.id,k))continue}}
+    const k=warPick(),atWarAny=realE().some(x=>x!==e&&G.emp[x].alive&&atWar(e,x));
+    const powCap=(atWarAny?10+6*mine.length:5+3*mine.length)*(1+.25*E.tech.wpn);
+    if(milPow(e)<powCap&&E.credits>=costOf(e,k)+(free.length>colN?10:0)){if(build(e,yardAt().id,k))continue;if(build(e,yardAt().id,'frig'))continue}
+    break;
+  }
+  const DF=DIFF[G.diff]||DIFF.normal;
+  const idle=G.fleets.filter(f=>f.owner===e&&f.path.length===0);
+  for(const f of idle){
+    const{dist}=bfs(f.at);
+    if(f.col>0){
+      let best=null,bd=1e9;
+      for(const s of S){const own=s.owner===e&&s.pop<=0;if((s.owner<0||own)&&!s.haven&&!targeted.has(s.id)&&dist[s.id]>0){const sc=dist[s.id]*3-cap(s)*.6-(own?4:0);if(sc<bd){bd=sc;best=s}}}
+      if(best){order(f,best.id,{frig:f.frig>=3?1:0,col:f.col});targeted.add(best.id)}
+    }
+    if(!warships(f)||f.path.length)continue;
+    const here=S[f.at];
+    const keepN=(here.owner===e&&threat.includes(here))?Math.min(2,f.frig):0;
+    const n={frig:f.frig-keepN,dd:f.dd,cv:f.cv};if(n.frig+n.dd+n.cv<=0)continue;
+    const my=fleetPow(e,{...n,adm:f.adm});let best=null,bv=-1e9;
+    const reach=my>=20?12:my>=10?8:5;
+    for(const s of S){if(dist[s.id]<=0||dist[s.id]>reach)continue;
+      const isTarget=(s.owner>=0&&s.owner!==e&&atWar(e,s.owner))||(s.haven&&s.owner<0&&G.turn>=12);if(!isTarget)continue;
+      const defO=s.owner>=0?s.owner:PIR();
+      const th=(s.owner>=0?starStr(s):0)+powSum(defO,G.fleets.filter(g=>g.at===s.id&&g.owner===defO));
+      if(my>th*1.35+.5){const v=(s.haven?6:s.pop*2+(s.home?8:0))-dist[s.id]*(reach>5?1:2)+(s.owner===0?2:0);if(v>bv){bv=v;best=s}}
+    }
+    if(best&&G.turn>=DF.atk){order(f,best.id,n);continue}
+    if(here.owner!==e||!border.includes(here)){
+      const pool=threat.length?threat:border.length?border:mine;
+      const tg=pool.slice().sort((a,b)=>dist[a.id]-dist[b.id])[0];
+      if(tg&&tg.id!==f.at)order(f,tg.id,n);
+    }
+  }
+}
+
+/* ---------- turn ---------- */
+function updateVis(){
+  const S=G.stars;vis=S.map(()=>false);
+  const sens=done(0,'sensors');
+  const mark=(id,deep)=>{vis[id]=true;for(const b of S[id].adj){vis[b]=true;if(deep)for(const c of S[b].adj)vis[c]=true}};
+  S.forEach(s=>{if(s.owner===0)mark(s.id,sens)});
+  G.fleets.forEach(f=>{if(f.owner===0)mark(f.at,false)});
+  vis.forEach((v,i)=>{if(v){G.seen[i]=true;G.known[i]=S[i].owner}});
+}
+function score(e){
+  let pop=0;for(const s of G.stars)if(s.owner===e)pop+=s.pop;
+  return Math.round(sysCount(e)*10+pop+techsDone(e)*5+milPow(e));
+}
+const domNeed=()=>Math.ceil(G.stars.length*.6);
+function endTurn(){
+  if(G.over)return;
+  const before=G.log.length?G.log[0]:null,cr0=G.emp[0].credits;
+  const bd=borders();
+  for(let e=1;e<NE();e++)if(G.emp[e].alive){aiDiplo(e,bd);aiTurn(e);}
+  pirateTurn();
+  G.offers=G.offers.filter(o=>G.turn-o.t<2);
+  for(const f of G.fleets){const sp=speed(f);for(let k=0;k<sp&&f.path.length;k++){
+    const nx=f.path[0],ns=G.stars[nx];f.at=f.path.shift();
+    if(G.fleets.some(g=>g!==f&&g.at===nx&&atWar(g.owner,f.owner)&&warships(g)>0))f.path=[];}}
+  updateVis();
+  for(const s of G.stars)resolveCombat(s);
+  for(const f of G.fleets){const s=G.stars[f.at];if(s.anom&&ships(f)>0&&!isPir(f.owner))investigate(s,f);
+    if(s.haven&&warships(f)>0&&!isPir(f.owner)&&!G.fleets.some(g=>g.at===s.id&&isPir(g.owner)&&ships(g)>0)){s.haven=false;
+      if(f.owner===0){G.emp[0].credits+=30;addLog(`Your fleet razed the empty pirate haven at ${s.name}. Bounty: 30 credits.`,'good')}}}
+  for(const f of G.fleets){
+    if(f.path.length||f.col<=0||f.colTarget!==f.at)continue;
+    const s=G.stars[f.at];
+    const rivals=G.fleets.some(g=>g.at===s.id&&atWar(g.owner,f.owner)&&ships(g)>0);
+    if((s.owner<0||(s.owner===f.owner&&s.pop<=0))&&!rivals&&!s.haven){
+      s.owner=f.owner;s.pop=govOf(f.owner)==='frontier'?1:.5;s.def=1;f.col--;s.pend=null;
+      if(f.owner===0)addLog(`${G.player.cit} founded a colony at ${s.name} (${TYPES[s.type].name}, room for ${cap(s)} pop).`,'good');
+      else if(vis[s.id])addLog(`${capName(f.owner)} settled ${s.name}.`,'info');
+    }else if(s.owner>=0&&f.owner===0)addLog(`${s.name} was already claimed. Your colony ship is waiting there.`,'info');
+    f.colTarget=null;
+  }
+  mergeFleets();
+  for(const s of G.stars){const p=s.pend;if(!p)continue;
+    const y=G.stars[p.y],yardOk=y.owner===p.o&&y.yard&&y.pop>0;
+    const blocker=G.fleets.find(g=>g.at===s.id&&atWar(g.owner,p.o)&&warships(g)>0);
+    if(s.owner>=0||!yardOk){s.pend=null;if(p.o===0&&s.owner!==0)addLog(`Your claim on ${s.name} lapsed.`,'bad');continue}
+    if(blocker){s.pend=null;
+      if(p.o===0)addLog(`${EMP_META[blocker.owner].short} warships broke your claim on ${s.name}.`,'bad');
+      else if(blocker.owner===0)addLog(`Your warships broke the ${EMP_META[p.o].short} claim on ${s.name}.`,'good');continue}
+    if(--p.t<=0){s.pend=null;Object.assign(s,{owner:p.o,pop:0,def:0,yard:false,hub:false});
+      if(p.o===0)addLog(`Claim on ${s.name} established. Send a colony ship to settle it.`,'good');
+      else if(vis[s.id])addLog(`${capName(p.o)} claimed ${s.name}.`,'info');}
+  }
+  const inc0=income(0);
+  G.emp.forEach((E,e)=>{if(!E.alive||E.pirate)return;const inc=income(e);E.credits+=inc.c;addResearch(e,inc.r);});
+  for(const s of G.stars)if(s.owner>=0&&s.pop>0&&s.pop<cap(s))s.pop=Math.min(cap(s),Math.round((s.pop+growth(s))*100)/100);
+  G.emp.forEach((E,e)=>{
+    if(E.pirate||!E.alive)return;
+    if(!G.stars.some(s=>s.owner===e&&s.pop>0)){E.alive=false;G.fleets=G.fleets.filter(f=>f.owner!==e);
+      G.stars.forEach(s=>{if(s.owner===e)Object.assign(s,{owner:-1,pop:0,def:0,yard:false,hub:false,gov:null});if(s.pend&&s.pend.o===e)s.pend=null});
+      if(e)addLog(`${capName(e)} has collapsed.`,'good');}
+  });
+  if(G.turn%10===0){G.pool=newLeaderPool(Math.random);G.poolT=G.turn;}
+  G.turn++;
+  updateVis();
+  checkVictory();
+  const fresh=[];for(const l of G.log){if(l===before)break;fresh.push(l)}
+  G.sum={turn:G.turn,c:G.emp[0].credits-cr0,inc:inc0.c,r:inc0.r,ev:fresh.slice().reverse()};
+  if(fresh.length)unread=tab!=='log';
+  showSum=true;
+  if(sel!=null)resetSend();
+  save();render();
+}
+function checkVictory(){
+  const alive=realE().filter(e=>G.emp[e].alive);
+  if(!G.emp[0].alive){G.over={res:'lose',how:'elim'};return}
+  if(alive.length===1){G.over={res:'win',how:'conquest',by:0};return}
+  const dn=domNeed();
+  for(const e of alive)if(sysCount(e)>=dn){G.over={res:e===0?'win':'lose',how:'domination',by:e};return}
+  if(G.techWin!=null){G.over={res:G.techWin===0?'win':'lose',how:'tech',by:G.techWin};return}
+  if(G.turn>G.limit){const best=alive.slice().sort((a,b)=>score(b)-score(a))[0];G.over={res:best===0?'win':'lose',how:'score',by:best};}
+}
+
+/* ---------- save ---------- */
+function save(){try{localStorage.setItem(SAVE,JSON.stringify(G))}catch(e){}}
+function load(){try{const s=localStorage.getItem(SAVE);if(!s)return false;const g=JSON.parse(s);if(!g||!g.stars||!(g.v===1||g.v===2))return false;G=g;return true}catch(e){return false}}
+function migrate(){
+  if(!G.player)G.player={...DEFAULT_PLAYER,name:'Ascendancy',cit:'Ascendants'};
+  G.player={...DEFAULT_PLAYER,...G.player};
+  if(G.v===1){
+    G.world=1000;G.size=G.player.size||'medium';G.shape='scatter';
+    const N=G.emp.length;
+    G.emp.forEach((E,e)=>{E.gov??=(e===0?'council':RIVALS[e-1].gov);E.legacyProp=E.tech.prop||0;E.done={};E.rep={};E.prog={};E.focus=null;E.tech.adm??=0});
+    G.emp.push({pirate:true,gov:'council',credits:0,tech:{wpn:0,prop:0,ind:0,adm:0},done:{},rep:{},prog:{},focus:null,alive:true});
+    G.rel=[...Array(N)].map((_,a)=>[...Array(N)].map((_,b)=>a===b?null:'war'));
+    G.relT=G.rel.map(r=>r.map(()=>G.turn));G.att=G.rel.map(r=>r.map(()=>0));
+    G.offers=[];G.asked={};G.leaders=[];G.pool=newLeaderPool(Math.random);G.poolT=G.turn;G.lid=1;
+    G.limit=(SIZES[G.size]||SIZES.medium).limit+G.turn;G.techWin=null;G.sum=null;
+    if(typeof G.over==='string')G.over={res:G.over,how:G.over==='win'?'conquest':'elim',by:0};
+    G.stars.forEach(s=>{s.bld??=[];s.gov=null;s.hub??=false;s.pend??=null;if(s.yard==null)s.yard=!!(s.home&&s.owner>=0&&s.pop>0)});
+    placeHavens(G.stars,G.stars.filter(s=>s.home).map(s=>s.id),Math.random,128);
+    G.stars.forEach(s=>{if(s.haven&&s.owner>=0)s.haven=false});
+    G.stars.filter(s=>s.haven).forEach(h=>G.fleets.push({id:G.nid++,owner:N,at:h.id,path:[],frig:2+Math.floor(G.turn/15),dd:0,cv:0,col:0,sc:0,colTarget:null,adm:null}));
+    G.fleets.forEach(f=>{f.dd=0;f.cv=0;f.sc??=0;f.adm=null});
+    G.v=2;applyMeta();
+    G.emp.forEach((E,e)=>{if(!E.pirate)E.focus=pickTech(e)});
+    addLog('Your empire adapted to new galactic rules: a research tree, diplomacy, leaders and pirate havens.','info');
+  }
+  applyMeta();
+}
+
+/* ---------- map ---------- */
+const canvas=$('#map'),ctx=canvas.getContext('2d'),oc=document.createElement('canvas'),octx=oc.getContext('2d');
+let dpr=1,bgStars=[],W=0,H=0,showSum=false;
+const SZc=()=>SIZES[G.size]||SIZES.medium;
+const fitZ=()=>Math.min(W,H)/((G.world||1000)*1.04);
+const maxZ=()=>Math.max(fitZ()*1.5,150/SZc().sp);
+const minZ=()=>fitZ()*.85;
+function clampCam(){
+  cam.z=clamp(cam.z,minZ(),maxZ());const L=G.world||1000;
+  cam.x=clamp(cam.x,0,L);cam.y=clamp(cam.y,0,L);
+}
+function camFit(){const L=G.world||1000;cam={x:L/2,y:L/2,z:fitZ()}}
+function camHome(){const h=G.stars.find(s=>s.owner===0&&s.home)||G.stars.find(s=>s.owner===0);
+  if(!h){camFit();return}cam={x:h.x,y:h.y,z:clamp(Math.max(fitZ(),56/SZc().sp),minZ(),maxZ())};
+  if(fitZ()*SZc().sp>=44)camFit();}
+function resize(){
+  const w=$('#mapbox').clientWidth;if(!w)return;dpr=window.devicePixelRatio||1;
+  const h=Math.round(Math.min(w*1.05,Math.max(320,window.innerHeight*.72)));
+  W=w;H=h;canvas.style.height=h+'px';canvas.width=oc.width=Math.round(w*dpr);canvas.height=oc.height=Math.round(h*dpr);
+  const R=mulberry32(7);bgStars=[...Array(240)].map(()=>({x:R()*w,y:R()*h,a:.15+R()*.5,r:R()<.08?1.3:.7}));
+  if(G){if(camReset){camHome();camReset=false}clampCam()}
+  draw();
+}
+const sx=x=>(x-cam.x)*cam.z+W/2,sy=y=>(y-cam.y)*cam.z+H/2;
+const wx=px=>(px-W/2)/cam.z+cam.x,wy=py=>(py-H/2)/cam.z+cam.y;
+function ownerCol(o){return o>=0&&EMP_META[o]?EMP_META[o].col:null}
+function shade(hex){const n=parseInt(hex.slice(1),16);const r=(n>>16)*.35|0,g=((n>>8)&255)*.35|0,b=(n&255)*.35|0;return `rgb(${r},${g},${b})`}
+let rafPending=false;
+function requestDraw(){if(rafPending)return;rafPending=true;requestAnimationFrame(()=>{rafPending=false;draw()})}
+function pill(x,y,text,col){
+  ctx.font='500 10.5px "IBM Plex Mono",ui-monospace,monospace';const w=ctx.measureText(text).width+8;
+  ctx.fillStyle='rgba(7,10,20,.82)';ctx.fillRect(x,y-7,w+9,14);
+  ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(x+3,y-4);ctx.lineTo(x+9,y);ctx.lineTo(x+3,y+4);ctx.closePath();ctx.fill();
+  ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(text,x+12,y+.5);
+}
+function draw(){
+  if(!G||!W||!canvas.width||!oc.width)return;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle='#070a14';ctx.fillRect(0,0,W,H);
+  for(const b of bgStars){ctx.fillStyle=`rgba(200,210,240,${b.a})`;ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,7);ctx.fill()}
+  const S=G.stars,z=cam.z,spPx=SZc().sp*z,crowd=spPx<44;
+  const C=control(),RR=.44*SZc().sp*z;
+  const on=s=>{const x=sx(s.x),y=sy(s.y);return x>-80&&y>-80&&x<W+80&&y<H+80};
+  // influence borders
+  for(let e=0;e<G.emp.length;e++){
+    if(isPir(e))continue;
+    const ids=S.filter(s=>G.seen[s.id]&&C[s.id]===e).map(s=>s.id);if(!ids.length)continue;
+    const set=new Set(ids),col=EMP_META[e].col;
+    const shape=(c,r)=>{c.beginPath();for(const i of ids){c.moveTo(sx(S[i].x)+r,sy(S[i].y));c.arc(sx(S[i].x),sy(S[i].y),r,0,7)}c.fill();
+      c.lineWidth=RR*1.2+2*(r-RR);c.beginPath();for(const [a,b] of G.edges)if(set.has(a)&&set.has(b)){c.moveTo(sx(S[a].x),sy(S[a].y));c.lineTo(sx(S[b].x),sy(S[b].y))}c.stroke();};
+    octx.setTransform(dpr,0,0,dpr,0,0);octx.globalCompositeOperation='source-over';octx.clearRect(0,0,W,H);
+    octx.fillStyle=octx.strokeStyle=col;shape(octx,RR);
+    ctx.globalAlpha=.11;ctx.drawImage(oc,0,0,W,H);ctx.globalAlpha=1;
+    octx.clearRect(0,0,W,H);shape(octx,RR+1.7);
+    octx.globalCompositeOperation='destination-out';shape(octx,RR);octx.globalCompositeOperation='source-over';
+    ctx.globalAlpha=.9;ctx.drawImage(oc,0,0,W,H);ctx.globalAlpha=1;
+  }
+  // lanes
+  ctx.lineWidth=1;
+  for(const [a,b] of G.edges){const A=S[a],B=S[b];const sa=G.seen[a],sb=G.seen[b];if(!sa&&!sb)continue;
+    ctx.strokeStyle=sa&&sb?'rgba(150,170,220,.32)':'rgba(150,170,220,.13)';ctx.setLineDash(sa&&sb?[]:[3,4]);
+    ctx.beginPath();ctx.moveTo(sx(A.x),sy(A.y));ctx.lineTo(sx(B.x),sy(B.y));ctx.stroke();}
+  ctx.setLineDash([]);
+  // player routes
+  for(const f of G.fleets){if(f.owner!==0||!f.path.length)continue;
+    ctx.strokeStyle='rgba(242,184,75,.85)';ctx.lineWidth=1.6;ctx.setLineDash([5,4]);ctx.beginPath();
+    ctx.moveTo(sx(S[f.at].x),sy(S[f.at].y));for(const p of f.path)ctx.lineTo(sx(S[p].x),sy(S[p].y));ctx.stroke();ctx.setLineDash([]);
+    const end=S[f.path[f.path.length-1]];ctx.strokeStyle='#f2b84b';ctx.beginPath();ctx.arc(sx(end.x),sy(end.y),13,0,7);ctx.stroke();}
+  // stars
+  for(const s of S){
+    if(!on(s))continue;
+    const x=sx(s.x),y=sy(s.y);
+    if(!G.seen[s.id]){ctx.fillStyle='rgba(140,150,180,.45)';ctx.beginPath();ctx.arc(x,y,2.2,0,7);ctx.fill();continue}
+    const r=(crowd?3.5:4.5)+cap(s)*(crowd?.2:.3)+(s.home?1.5:0);
+    const o=vis[s.id]?s.owner:G.known[s.id];
+    if(C[s.id]===-2){ctx.strokeStyle='rgba(205,210,230,.55)';ctx.lineWidth=1;ctx.setLineDash([2,3]);ctx.beginPath();ctx.arc(x,y,r+5,0,7);ctx.stroke();ctx.setLineDash([]);}
+    if(s.pend&&vis[s.id]){const pc=EMP_META[s.pend.o].col,dn=(CLAIM_TURNS-s.pend.t)/CLAIM_TURNS;
+      ctx.strokeStyle=pc;ctx.globalAlpha=.45;ctx.lineWidth=1;ctx.setLineDash([2,3]);ctx.beginPath();ctx.arc(x,y,r+4,0,7);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;
+      if(dn>0){ctx.lineWidth=2.2;ctx.beginPath();ctx.arc(x,y,r+4,-Math.PI/2,-Math.PI/2+Math.PI*2*dn);ctx.stroke();}}
+    if(s.haven){ctx.strokeStyle=PIRATE_META.col;ctx.lineWidth=1.5;ctx.beginPath();for(let k=0;k<8;k++){const a=k*Math.PI/4,rr=r+(k%2?4:8);const px=x+Math.cos(a)*rr,py=y+Math.sin(a)*rr;k?ctx.lineTo(px,py):ctx.moveTo(px,py)}ctx.closePath();ctx.stroke();}
+    if(o>=0){const cl=s.pop<=0;ctx.strokeStyle=ownerCol(o);ctx.lineWidth=cl?1.4:2;ctx.setLineDash(cl?[3,3]:[]);ctx.beginPath();ctx.arc(x,y,r+3.5,0,7);ctx.stroke();ctx.setLineDash([]);
+      if(s.home){ctx.beginPath();ctx.arc(x,y,r+7,0,7);ctx.lineWidth=1;ctx.stroke();}
+      if(s.yard){ctx.fillStyle=ownerCol(o);ctx.save();ctx.translate(x-r-10,y);ctx.rotate(Math.PI/4);ctx.fillRect(-3.2,-3.2,6.4,6.4);ctx.restore();}
+      if(s.hub&&s.pop>0){ctx.strokeStyle=ownerCol(o);ctx.lineWidth=1.5;ctx.strokeRect(x-r-13.5,y+6,7,7);}}
+    const g=ctx.createRadialGradient(x-r*.35,y-r*.35,r*.1,x,y,r);g.addColorStop(0,'#ffffff');g.addColorStop(.25,TYPES[s.type].col);g.addColorStop(1,shade(TYPES[s.type].col));
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();
+    if(!vis[s.id]){ctx.fillStyle='rgba(7,10,20,.45)';ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();}
+    ctx.textAlign='center';ctx.textBaseline='top';
+    const showName=!crowd||o===0||sel===s.id||s.home;
+    if(showName){ctx.font='500 10.5px "IBM Plex Mono",ui-monospace,monospace';
+      ctx.fillStyle=o===0?EMP_META[0].col:vis[s.id]?'#c3c9dc':'#7a829c';ctx.fillText(s.name,x,y+r+(s.home?9:6));}
+    if(tmode&&vis[s.id]&&(s.owner>0||s.haven)){const d=defStr(s).st,my=fleetPow(0,{...tmode.n,adm:tmode.adm});const war=s.haven||atWar(0,s.owner);
+      ctx.font='600 10.5px "IBM Plex Mono",ui-monospace,monospace';ctx.fillStyle=!war?'#8790ac':my>d?'#7fd19b':'#ef7a7a';
+      ctx.fillText(war?`DEF ${r1(d)}`:'PEACE',x,y+r+(showName?(s.home?22:19):6));}
+    if(s.anom){ctx.font='700 12px "IBM Plex Mono",ui-monospace,monospace';ctx.fillStyle='#f4e7b8';ctx.fillText('?',x-r-7,y-r-12);}
+    if(sel===s.id){ctx.strokeStyle='#ffffff';ctx.lineWidth=1.2;ctx.setLineDash([2,3]);ctx.beginPath();ctx.arc(x,y,r+11,0,7);ctx.stroke();ctx.setLineDash([]);}
+  }
+  if(sel!=null&&!G.seen[sel]){const s=S[sel];ctx.strokeStyle='#fff';ctx.setLineDash([2,3]);ctx.beginPath();ctx.arc(sx(s.x),sy(s.y),9,0,7);ctx.stroke();ctx.setLineDash([]);}
+  // fleets
+  for(const s of S){
+    if(!vis[s.id]||!on(s))continue;
+    const by={};for(const f of G.fleets)if(f.at===s.id&&ships(f)>0){const b=(by[f.owner]=by[f.owner]||{frig:0,dd:0,cv:0,col:0,sc:0});for(const k of KEYS)b[k]+=f[k]||0}
+    let k=0;
+    for(const o of Object.keys(by)){const v=by[o];const x=sx(s.x)+10,y=sy(s.y)-14-k*16;
+      pill(x,y,fleetText(v,true),EMP_META[o].col);k++;}
+  }
+}
+
+/* ---------- map input ---------- */
+const ptrs=new Map();let drag=null,pinch=null;
+canvas.addEventListener('pointerdown',ev=>{
+  canvas.setPointerCapture(ev.pointerId);ptrs.set(ev.pointerId,{x:ev.offsetX,y:ev.offsetY});
+  if(ptrs.size===1)drag={x0:ev.offsetX,y0:ev.offsetY,cx:cam.x,cy:cam.y,moved:false};
+  else if(ptrs.size===2){const [a,b]=[...ptrs.values()];pinch={d0:Math.hypot(a.x-b.x,a.y-b.y),z0:cam.z,mx:(a.x+b.x)/2,my:(a.y+b.y)/2,wx:wx((a.x+b.x)/2),wy:wy((a.y+b.y)/2)};if(drag)drag.moved=true}
+});
+canvas.addEventListener('pointermove',ev=>{
+  if(!ptrs.has(ev.pointerId))return;ptrs.set(ev.pointerId,{x:ev.offsetX,y:ev.offsetY});
+  if(ptrs.size===2&&pinch){const [a,b]=[...ptrs.values()];const d=Math.hypot(a.x-b.x,a.y-b.y);
+    cam.z=clamp(pinch.z0*d/Math.max(1,pinch.d0),minZ(),maxZ());const mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
+    cam.x=pinch.wx-(mx-W/2)/cam.z;cam.y=pinch.wy-(my-H/2)/cam.z;clampCam();requestDraw();return}
+  if(drag&&ptrs.size===1){const dx=ev.offsetX-drag.x0,dy=ev.offsetY-drag.y0;
+    if(!drag.moved&&Math.hypot(dx,dy)>7){drag.moved=true;canvas.classList.add('dragging')}
+    if(drag.moved){cam.x=drag.cx-dx/cam.z;cam.y=drag.cy-dy/cam.z;clampCam();requestDraw()}}
+});
+function endPtr(ev){
+  if(!ptrs.has(ev.pointerId))return;ptrs.delete(ev.pointerId);
+  if(ptrs.size<2)pinch=null;
+  if(ptrs.size===0){const d=drag;drag=null;canvas.classList.remove('dragging');if(d&&!d.moved&&ev.type==='pointerup')tapAt(ev.offsetX,ev.offsetY)}
+  else if(ptrs.size===1){const [p]=[...ptrs.values()];drag={x0:p.x,y0:p.y,cx:cam.x,cy:cam.y,moved:true}}
+}
+canvas.addEventListener('pointerup',endPtr);canvas.addEventListener('pointercancel',endPtr);
+canvas.addEventListener('wheel',ev=>{ev.preventDefault();const f=Math.exp(-ev.deltaY*.0015);
+  const wx0=wx(ev.offsetX),wy0=wy(ev.offsetY);cam.z=clamp(cam.z*f,minZ(),maxZ());
+  cam.x=wx0-(ev.offsetX-W/2)/cam.z;cam.y=wy0-(ev.offsetY-H/2)/cam.z;clampCam();requestDraw()},{passive:false});
+function zoomBy(f){cam.z=clamp(cam.z*f,minZ(),maxZ());clampCam();draw()}
+$('#zin').addEventListener('click',()=>zoomBy(1.4));
+$('#zout').addEventListener('click',()=>zoomBy(1/1.4));
+$('#zfit').addEventListener('click',()=>{camFit();clampCam();draw()});
+$('#zhome').addEventListener('click',()=>{const h=G.stars.find(s=>s.owner===0&&s.home)||G.stars.find(s=>s.owner===0);if(h){cam.x=h.x;cam.y=h.y;cam.z=Math.max(cam.z,clamp(56/SZc().sp,minZ(),maxZ()));clampCam();sel=h.id;tab='sys';resetSend();render()}});
+function tapAt(px,py){
+  let best=null,bd=28;
+  for(const s of G.stars){const d=Math.hypot(sx(s.x)-px,sy(s.y)-py);if(d<bd){bd=d;best=s.id}}
+  hideSum();
+  if(tmode){
+    if(best==null)return;
+    const f=G.fleets.find(x=>x.id===tmode.id);
+    if(f&&best!==f.at){const nf=order(f,best,tmode.n);
+      if(nf){const turns=Math.ceil(nf.path.length/speed(nf)),ds=G.stars[best];let extra='';
+        if(vis[best]&&(ds.owner>0||ds.haven)){const war=ds.haven||atWar(0,ds.owner);extra=war?` ${odds(nf,defStr(ds).st).txt}`:` You are at peace with ${ename(ds.owner)}, so there will be no battle.`}
+        showToast(`Fleet bound for ${G.seen[best]?ds.name:'an uncharted system'}. Arrives in ${plural(turns,'turn')}.${extra}`);}}
+    tmode=null;resetSend();save();render();return;
+  }
+  sel=best;tab='sys';resetSend();render();
+}
+$('#cancelT').addEventListener('click',()=>{tmode=null;render()});
+function showToast(m){hideSum();const t=$('#toast');t.textContent=m;t.hidden=false;t.style.opacity=1;clearTimeout(toastT);toastT=setTimeout(()=>{t.style.opacity=0;setTimeout(()=>t.hidden=true,300)},4600)}
+function hideSum(){showSum=false;$('#sum').hidden=true}
+
+/* ---------- panels ---------- */
+function idleFleet(id){return G.fleets.find(f=>f.owner===0&&f.at===id&&f.path.length===0)}
+function resetSend(){const f=sel!=null?idleFleet(sel):null;send={};for(const k of KEYS)send[k]=f?(f[k]||0):0}
+function defStr(s){
+  const o=s.owner>=0?s.owner:(s.haven?PIR():-1);
+  const fs=o<0?[]:G.fleets.filter(g=>g.at===s.id&&g.owner===o&&!g.path.length&&ships(g)>0);
+  const fixed=s.owner>=0?starStr(s):0;
+  const gar={frig:0,dd:0,cv:0,col:0,sc:0};fs.forEach(f=>KEYS.forEach(k=>gar[k]+=f[k]||0));
+  return{o,fs,gar,fixed,st:fixed+(o>=0?powSum(o,fs):0)};
+}
+function odds(f,def){
+  const my=fleetPow(0,f),hull=(f.frig||0)+2*(f.dd||0)+2*(f.cv||0),n=warships(f);
+  if(n<=0)return{txt:'No warships in this fleet, so it cannot attack.',cls:'t-bad'};
+  if(def<=0)return{txt:'Undefended. Your warships take it with no losses.',cls:'t-good'};
+  if(my<=def)return{txt:'Likely defeat. The defenders are as strong or stronger.',cls:'t-bad'};
+  const L=leaderById(f.adm),sf=L&&L.trait==='steadfast'?.7:1;
+  const lo=Math.round(hull*Math.min(1,def/my*.5)*sf),hi=Math.round(hull*Math.min(1,def/my*.85)*sf);
+  const loss=lo===hi?`${lo}`:`${lo}–${hi}`;
+  return my/def>=1.8?{txt:`Strong advantage. Expect to lose about ${loss} hull point${hi===1?'':'s'} of ships.`,cls:'t-good'}
+    :{txt:`Narrow win likely. Expect to lose ${loss} hull point${hi===1?'':'s'} of ships.`,cls:'t-warn'};
+}
+const stepper=(k,have)=>`<div class="step"><span>${SHIPS[k].pl}</span><div class="ctl"><button type="button" data-s="${k}-" aria-label="Fewer ${SHIPS[k].pl.toLowerCase()}">−</button><span>${send[k]}/${have}</span><button type="button" data-s="${k}+" aria-label="More ${SHIPS[k].pl.toLowerCase()}">+</button></div></div>`;
+function leaderSelect(kind,current,id){
+  const opts=G.leaders.filter(l=>l.kind===kind);if(!opts.length)return '';
+  const place=l=>{const p=leaderPlace(l);return p?(p.f?` (fleet at ${G.stars[p.f.at].name})`:` (governing ${p.s.name})`):''};
+  return `<label class="dim" for="${id}" style="font-size:12.5px">${kind==='adm'?'Admiral':'Governor'}</label>
+    <select class="sel" id="${id}"><option value="">None</option>${opts.map(l=>`<option value="${l.id}" ${l.id===current?'selected':''}>${esc(l.name)} · ${TRAITS[l.trait].name}${l.id===current?'':place(l)}</option>`).join('')}</select>`;
+}
+function sysHTML(){
+  const S=G.stars,E=G.emp[0];
+  if(sel==null)return `<div><div class="eyebrow">Command</div><h2>Star chart</h2></div><p class="dim">Tap any system on the map. Drag to pan, pinch or scroll to zoom.</p>`;
+  const s=S[sel];
+  if(!G.seen[sel])return `<div><div class="eyebrow">No survey data</div><h2>Uncharted system</h2></div>
+    <p class="dim">Move a ship within one lane of this system to reveal what is here.</p>`;
+  const v=vis[sel],o=v?s.owner:G.known[sel],C=control()[sel],dis=k=>E.credits<costOf(0,k)?'disabled':'',isCl=o>=0&&s.pop<=0,pen=income(0).pen;
+  let h=`<div><div class="eyebrow">${TYPES[s.type].name}${s.home?' · Capital':''}</div><h2>${s.name}</h2>
+    ${o>=0?`<span class="chip" style="color:${EMP_META[o].col}">${o===0?(isCl?'Your claim':'Your system'):EMP_META[o].short+(isCl?' claim':'')}</span>`
+      :s.haven?`<span class="chip" style="color:${PIRATE_META.col}">Pirate haven</span>`
+      :C>=0&&!isPir(C)?`<span class="chip" style="color:${EMP_META[C].col}">Unclaimed · ${C===0?'your':EMP_META[C].short} influence</span>`
+      :`<span class="chip" style="color:var(--dim)">${C===-2?'Unclaimed · contested':'Unclaimed'}</span>`}
+    ${o>0?`<span class="chip" style="color:${atWar(0,o)?'var(--bad)':'var(--dim)'};margin-left:6px">${atWar(0,o)?'At war':relOf(0,o)==='trade'?'Trade partner':'At peace'}</span>`:''}
+    ${!v?`<p class="dim" style="margin-top:8px;font-size:13px">Last seen data. Out of sensor range.</p>`:''}</div>`;
+  const rows=[];
+  if(s.owner>=0&&s.pop>0&&v)rows.push(['Population',`${s.pop.toFixed(1)} / ${cap(s)}`]);else rows.push(['Room for',`${cap(s)} pop`]);
+  if(s.owner>=0&&s.pop>0&&v)rows.push(['Defense',`${s.def} / ${defMax(s)}`]);
+  if(s.owner>=0&&s.yard&&v)rows.push(['Shipyard','In orbit']);
+  if(s.owner>=0&&s.hub&&v)rows.push(['Admin hub','+3 capacity']);
+  if(s.owner===0&&s.pop>0){const so=starOut(s,0),m=incMult(0);rows.push(['Output',`+${Math.floor(so.c*m.c*(1-pen))} cr · +${r1(so.r*m.r*(1-pen))} rp`])}
+  if(s.special)rows.push(['Feature',SPECIAL[s.special].split(' · ')[0]]);
+  h+=`<dl class="kv">${rows.map(r=>`<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('')}</dl>`;
+  if(s.owner===0&&s.pop>0&&G.leaders.some(l=>l.kind==='gov')){const gl=govL(s);
+    h+=`<div style="display:grid;gap:6px">${leaderSelect('gov',s.gov,'govSel')}${gl?`<p class="dim" style="font-size:13px">${TRAITS[gl.trait].desc}.</p>`:''}</div>`}
+  if(v){
+    const by={};G.fleets.filter(f=>f.at===sel&&ships(f)>0).forEach(f=>{const b=(by[f.owner]=by[f.owner]||{frig:0,dd:0,cv:0,col:0,sc:0});KEYS.forEach(k=>b[k]+=f[k]||0)});
+    const k=Object.keys(by);
+    if(k.length)h+=`<div><h3>Ships in orbit</h3><div class="forces">${k.map(x=>`<div><span style="color:${EMP_META[x].col}">${EMP_META[x].short}</span><span>${fleetText(by[x],true)}</span></div>`).join('')}</div></div>`;
+  }
+  if(o>0||s.haven){
+    if(!v)h+=`<div class="intel"><h3 style="margin:0">Defender intel</h3><p class="dim" style="font-size:14px">No current intel. Move a ship within one lane of ${s.name} to see its defenses and garrison.</p></div>`;
+    else{const d=defStr(s),per=(1+.25*E.tech.wpn);const need=Math.floor(d.st/per)+1,comfy=Math.max(need,Math.ceil(d.st*1.8/per));
+      const war=s.haven||atWar(0,o);
+      const cand=G.fleets.filter(g=>g.owner===0&&!g.path.length&&warships(g)>0).map(g=>({g,dist:bfs(g.at).dist[s.id]})).filter(x=>x.dist>0).sort((a,b)=>a.dist-b.dist)[0];
+      const verdict=cand&&war?odds(cand.g,d.st):null;
+      h+=`<div class="intel"><h3 style="margin:0">${s.haven?'Pirate haven':'Defender intel'}</h3><dl class="kv">
+        ${s.owner>=0?`<dt>Fixed defenses</dt><dd>${r1(d.fixed)}</dd>`:''}
+        <dt>Garrison</dt><dd>${warships(d.gar)?fleetText(d.gar,true):'none'}</dd>
+        ${d.o>=0?`<dt>${EMP_META[d.o].short} weapons</dt><dd>Lv ${G.emp[d.o].tech.wpn}</dd>`:''}
+        ${hasB(s,'fortress')?'<dt>Fortress</dt><dd>Yes</dd>':''}
+        <dt><b style="color:var(--fg)">Total strength</b></dt><dd><b>${r1(d.st)}</b></dd></dl>
+        ${!war?`<p style="font-size:14px">You are at peace with ${ename(o)}. Declare war from the Empire tab before attacking.</p>`
+          :`<p style="font-size:14px">${d.st<=0?'Undefended. Any warship takes it.':`To win you need fleet strength above <b>${r1(d.st)}</b>: about <b>${need}+ frigates</b>, or <b>${comfy}+</b> for light losses. Destroyers count 2.5, carriers 2 and boost the fleet.`}</p>`}
+        ${verdict?`<p class="verdict"><span class="dim">Your nearest fleet (${fleetText(cand.g,true)} at ${S[cand.g.at].name}, ${plural(cand.dist,'lane')} away):</span> <span class="${verdict.cls}">${verdict.txt}</span></p>`:''}
+        ${s.haven?`<p class="dim" style="font-size:12.5px">Pirates raid colonies within 5 lanes. Destroying the haven ends the raids and pays a 30 credit bounty.</p>`:`<p class="dim" style="font-size:12.5px">Defenders win ties, and their numbers can change before you arrive.</p>`}</div>`;}
+  }
+  if(s.owner===0&&s.pop>0){
+    const shipBtn=k=>{const ok=unlocked(0,k);const why=!ok?`Research ${TECH[SHIPS[k].tech].name}`:k==='col'?`${costOf(0,k)} cr · −1 pop`:k==='sc'?`${costOf(0,k)} cr · fast`:`${costOf(0,k)} cr · strength ${SHIPS[k].pow}`;
+      const dd=!ok||E.credits<costOf(0,k)||(k==='col'&&s.pop<3);return `<button class="btn" data-b="${k}" type="button" ${dd?'disabled':''}>${SHIPS[k].name}<small>${why}</small></button>`};
+    h+=`<div><h3>${s.yard?'Shipyard':'Construction'} · ${E.credits} credits</h3><div class="row">`+
+    (s.yard?KEYS.map(shipBtn).join(''):`<button class="btn" data-b="yard" type="button" ${dis('yard')}>Build shipyard<small>${COST.yard} cr</small></button>`)+
+    `<button class="btn" data-b="def" type="button" ${E.credits<COST.def||s.def>=defMax(s)?'disabled':''}>Defense +1<small>${s.def>=defMax(s)?'max':COST.def+' cr'}</small></button></div>
+    ${s.yard?'':`<p class="dim" style="font-size:13.5px;margin-top:8px">A shipyard lets this system build ships and extends your influence to every neighbouring system.</p>`}
+    ${s.yard&&s.pop<3?`<p class="dim" style="font-size:13.5px;margin-top:8px">Colony ships need 3 population here. This colony has ${s.pop.toFixed(1)}.</p>`:''}</div>`;
+    if(!s.hub){const why=s.pop<5?`Needs 5 population here (now ${s.pop.toFixed(1)}).`:hubCount(0)>=maxHubs(0)?`You can have one hub per 5 systems. Next at ${5*(hubCount(0)+1)} systems.`:'';
+      h+=`<div><button class="btn" data-b="hub" type="button" style="width:100%" ${why||E.credits<COST.hub?'disabled':''}>Administrative hub<small>${COST.hub} cr · +3 empire capacity</small></button>
+      ${why?`<p class="dim" style="font-size:13px;margin-top:6px">${why}</p>`:''}</div>`;}
+    const b=s.bld||[],sl=slots(s);
+    h+=`<div><h3>Buildings · ${b.length}/${sl} slot${sl>1?'s':''}</h3>${b.length?`<dl class="kv"${b.length<sl?' style="margin-bottom:10px"':''}>${b.map(k=>`<dt>${BLD[k].name}</dt><dd>${BLD[k].fx}</dd>`).join('')}</dl>`:''}`;
+    if(b.length<sl)h+=`<div class="row">${Object.keys(BLD).filter(k=>!b.includes(k)).map(k=>{const ok=unlocked(0,k);
+      return `<button class="btn" data-b="${k}" type="button" ${!ok||E.credits<BLD[k].cost?'disabled':''}>${BLD[k].name}<small>${ok?`${BLD[k].cost} cr · ${BLD[k].fx}`:`Research ${TECH[BLD[k].tech].name}`}</small></button>`}).join('')}</div>`;
+    if(sl<2)h+=`<p class="dim" style="font-size:13px;margin-top:8px">A second slot opens at 5 population.</p>`;
+    h+=`</div>`;
+  }
+  if(s.anom)h+=`<p style="font-size:14px"><b style="color:#f4e7b8">Anomaly detected.</b> <span class="dim">Send any ship here to investigate. It could be valuable, or a trap.</span></p>`;
+  if(s.owner===0&&s.pop<=0)h+=`<p class="dim" style="font-size:14px">Claimed but unsettled. It produces nothing and cannot build until a colony ship arrives.</p>`;
+  if(s.pend&&v)h+=`<p style="font-size:14px"><b style="color:${EMP_META[s.pend.o].col}">${s.pend.o===0?'Your':EMP_META[s.pend.o].short} claim in progress</b> <span class="dim">· ${plural(s.pend.t,'turn')} left. Enemy warships here will break it.</span></p>`;
+  if(s.owner<0&&!s.pend&&!s.haven&&v&&C===0){const src=claimSource(0,sel),cc=claimCost(0);
+    h+=`<div><button class="btn primary" type="button" data-claim="1" ${!src||E.credits<cc?'disabled':''}>Claim system<small>${cc} cr · takes ${CLAIM_TURNS} turns</small></button>
+    ${src?'':`<p class="dim" style="font-size:13px;margin-top:6px">Each shipyard handles one claim at a time, and the shipyards next to this system are busy.</p>`}</div>`;}
+  const f=idleFleet(sel);
+  if(f){
+    const nsend=KEYS.reduce((a,k)=>a+send[k],0),onlyFast=nsend&&!send.frig&&!send.dd&&!send.cv&&!send.col;
+    const al=leaderById(f.adm);
+    h+=`<div class="fleetbox"><h3 style="margin:0">Your fleet here</h3>
+      ${KEYS.filter(k=>f[k]).map(k=>stepper(k,f[k])).join('')}
+      ${warships(f)?`<p class="dim" style="font-size:13px">Attack strength <b style="color:var(--fg)">${r1(fleetPow(0,{...send,adm:f.adm}))}</b> · Weapons Lv ${E.tech.wpn}${send.cv?` · carriers +${Math.min(3,send.cv)*20}%`:''}</p>`:''}
+      ${onlyFast?`<p class="dim" style="font-size:13px">Scouts alone jump ${speed({frig:0,dd:0,cv:0,col:0,sc:1,owner:0})} lanes per turn. They are unarmed.</p>`:send.sc?`<p class="dim" style="font-size:13px">Mixed fleets move at warship speed.</p>`:''}
+      ${warships(f)&&G.leaders.some(l=>l.kind==='adm')?`<div style="display:grid;gap:6px">${leaderSelect('adm',f.adm,'admSel')}${al?`<p class="dim" style="font-size:13px">${TRAITS[al.trait].desc}. The admiral travels with the warships you send.</p>`:''}</div>`:''}
+      <button class="btn primary" type="button" data-go="1" ${nsend?'':'disabled'}>Set course<small>then tap a destination</small></button></div>`;
+  }
+  const moving=G.fleets.filter(x=>x.owner===0&&x.at===sel&&x.path.length);
+  if(moving.length)h+=`<div><h3>In transit</h3>${moving.map(m=>{const d=m.path[m.path.length-1];const t=Math.ceil(m.path.length/speed(m));
+    return `<div class="transit"><span>${fleetText(m,true)} → ${G.seen[d]?S[d].name:'uncharted'} · ${plural(t,'turn')}</span><button class="ghost" type="button" data-halt="${m.id}">Halt</button></div>`}).join('')}</div>`;
+  if(!f&&!moving.length&&s.owner<0&&!s.haven&&C!==0)h+=`<p class="dim" style="font-size:14px">Send a colony ship here to settle it, or bring it inside your borders with a shipyard next door and claim it.</p>`;
+  return h;
+}
+function resHTML(){
+  const E=G.emp[0],inc=income(0),sp=sprawl(0);
+  let h=`<div><div class="eyebrow">+${inc.r} research per turn · ${techsDone(0)} completed</div><h2>Research</h2></div>
+  <div class="tech" style="${sp.over?'border-color:var(--bad)':''}"><div class="top"><span class="nm">Empire capacity</span><span class="lv" style="${sp.over?'color:var(--bad)':''}">${fmtN(sp.use)} / ${sp.cap}</span></div>
+    <div class="bar"><i style="width:${Math.min(100,sp.use/sp.cap*100)}%;${sp.over?'background:var(--bad)':''}"></i></div>
+    <p class="dim" style="font-size:13.5px">${sp.over?`Over capacity: −${Math.round(sp.pen*100)}% credits and research.`:'Within capacity: no penalty.'} Colonies count 1, claims ½. Raise it with Society research and hubs.</p></div>`;
+  if(E.focus&&TECH[E.focus]){const t=TECH[E.focus],c=techCost(0,t),p=E.prog[t.id]||0,eta=Math.ceil((c-p)/Math.max(1,inc.r));
+    h+=`<div class="tech on"><div class="top"><span class="nm">${t.name}</span><span class="lv">${Math.floor(p)}/${c} · ${plural(eta,'turn')}</span></div>
+      <div class="bar"><i style="width:${Math.min(100,p/c*100)}%"></i></div><p class="dim" style="font-size:13.5px">${t.desc}.${t.rep?' Repeatable.':''}</p></div>`;}
+  for(const b of Object.keys(BRANCHES)){
+    const ts=TECHS.filter(t=>t.b===b);const dn=ts.filter(t=>!t.rep&&E.done[t.id]);
+    const av=ts.filter(t=>canResearch(0,t));const lock=ts.filter(t=>!t.rep&&!E.done[t.id]&&!canResearch(0,t));
+    h+=`<div class="branch"><h3 style="margin:0">${BRANCHES[b]}</h3>`;
+    if(dn.length)h+=`<div class="donelist">${dn.map(t=>`<span>✓ ${t.name}</span>`).join('')}${ts.filter(t=>t.rep&&E.rep[t.id]).map(t=>`<span>✓ ${t.name} ×${E.rep[t.id]}</span>`).join('')}</div>`;
+    h+=av.map(t=>`<button type="button" class="node ${E.focus===t.id?'on':''}" data-t="${t.id}"><span><b>${t.name}${t.rep?` ${(E.rep[t.id]||0)+1}`:''}</b><small>${t.desc}</small></span><span class="cost">${E.focus===t.id?'Researching':techCost(0,t)+' rp'}</span></button>`).join('');
+    h+=lock.slice(0,2).map(t=>`<button type="button" class="node" disabled><span><b>${t.name}</b><small>Needs ${t.req.filter(r=>!E.done[r]).map(r=>TECH[r].name).join(', ')}</small></span><span class="cost">${t.cost} rp</span></button>`).join('');
+    h+=`</div>`;
+  }
+  return h;
+}
+function empHTML(){
+  const E=G.emp[0];let h=`<div><div class="eyebrow">${esc(G.player.name)} · ${GOV[govOf(0)].name}</div><h2>Empire</h2></div>`;
+  const offers=G.offers.filter(o=>o.to===0&&G.emp[o.from].alive);
+  if(offers.length)h+=offers.map((o,i)=>`<div class="offer"><p><b style="color:${EMP_META[o.from].col}">${capName(o.from)}</b> ${o.type==='peace'?'offers a peace treaty.':'proposes a trade agreement (+10% credits for both).'}</p>
+    <div class="acts2"><button class="btn primary" type="button" data-offer="${G.offers.indexOf(o)}" data-ans="yes">Accept</button><button class="btn" type="button" data-offer="${G.offers.indexOf(o)}" data-ans="no">Refuse</button></div></div>`).join('');
+  h+=`<div style="display:grid;gap:8px"><h3 style="margin:0">Diplomacy</h3>`;
+  const myPow=milPow(0);
+  for(const x of realE()){if(x===0)continue;const X=G.emp[x];
+    if(!X.alive){h+=`<div class="rel"><div class="top"><span class="nm" style="color:${EMP_META[x].col};opacity:.6">${EMP_META[x].short}</span><span class="dim">Eliminated</span></div></div>`;continue}
+    const st=relOf(0,x),age=relAge(0,x),a=G.att[x][0],lockT=TREATY-age;
+    const stCol=st==='war'?'var(--bad)':st==='trade'?'var(--good)':'var(--dim)';
+    const asked=G.asked[x]&&G.turn-G.asked[x]<3;
+    let acts='';
+    if(st==='war')acts=`<button class="btn" type="button" data-dip="peace" data-x="${x}" ${asked?'disabled':''}>Propose peace<small>${asked?'Asked recently':'They decide now'}</small></button>`;
+    else{acts=`<button class="btn" type="button" data-dip="war" data-x="${x}" ${lockT>0?'disabled':''}>Declare war<small>${lockT>0?`Treaty holds ${plural(lockT,'more turn')}`:'Breaks the treaty'}</small></button>`;
+      acts+=st==='trade'?`<button class="btn" type="button" data-dip="untrade" data-x="${x}">Cancel trade<small>Back to peace</small></button>`
+        :`<button class="btn" type="button" data-dip="trade" data-x="${x}" ${asked||age<3?'disabled':''}>Propose trade<small>${asked?'Asked recently':age<3?'Too soon after war':'+10% credits each'}</small></button>`;}
+    h+=`<div class="rel"><div class="top"><span class="nm" style="color:${EMP_META[x].col}">${EMP_META[x].name.replace('the ','')}</span><span class="pill" style="color:${stCol}">${st==='war'?'At war':st==='trade'?'Trade':'Peace'}</span></div>
+      <dl class="kv"><dt>Government</dt><dd>${GOV[govOf(x)].name}</dd><dt>Attitude to you</dt><dd>${attLabel(a)}</dd><dt>Systems</dt><dd>${sysCount(x)} (you ${sysCount(0)})</dd><dt>Fleet power</dt><dd>${r1(milPow(x))} (you ${r1(myPow)})</dd></dl>
+      <div class="acts2">${acts}</div></div>`;
+  }
+  h+=`</div>`;
+  const slotsN=leaderSlots();
+  h+=`<div style="display:grid;gap:8px"><h3 style="margin:0">Leaders · ${G.leaders.length}/${slotsN} slots</h3>`;
+  h+=G.leaders.length?G.leaders.map(l=>{const p=leaderPlace(l);return `<div class="leader"><span><b>${esc(l.name)}</b> · ${l.kind==='adm'?'Admiral':'Governor'}<small>${TRAITS[l.trait].name}: ${TRAITS[l.trait].desc}. ${p?(p.f?`Commanding the fleet at ${G.stars[p.f.at].name}.`:`Governing ${p.s.name}.`):'Unassigned. Assign from a '+(l.kind==='adm'?'fleet':'colony')+' panel.'}</small></span><button class="ghost" type="button" data-fire="${l.id}">Dismiss</button></div>`}).join('')
+    :`<p class="dim" style="font-size:14px">No leaders yet. Admirals command fleets, governors run colonies.</p>`;
+  h+=`<h3 style="margin:6px 0 0">Candidates · new ones in ${plural(10-(G.turn%10),'turn')}</h3>`;
+  h+=G.pool.length?G.pool.map((c,i)=>`<div class="leader"><span><b>${esc(c.name)}</b> · ${c.kind==='adm'?'Admiral':'Governor'}<small>${TRAITS[c.trait].name}: ${TRAITS[c.trait].desc}</small></span><button class="btn" type="button" data-hire="${i}" ${E.credits<COST.hire||G.leaders.length>=slotsN?'disabled':''}>Hire<small>${COST.hire} cr</small></button></div>`).join('')
+    :`<p class="dim" style="font-size:14px">No candidates right now.</p>`;
+  h+=`<p class="dim" style="font-size:12.5px">Slots: 1, plus 1 per 4 systems, plus 1 from Officer Academy.</p></div>`;
+  h+=victoryHTML();
+  return h;
+}
+function victoryHTML(){
+  const alive=realE().filter(e=>G.emp[e].alive),dn=domNeed();
+  const domLead=alive.slice().sort((a,b)=>sysCount(b)-sysCount(a))[0];
+  const gateR=alive.map(e=>({e,p:G.emp[e].focus==='gate'?(G.emp[e].prog.gate||0)/TECH.gate.cost:0,can:canResearch(e,TECH.gate)})).sort((a,b)=>b.p-a.p);
+  const sc=alive.map(e=>({e,s:score(e)})).sort((a,b)=>b.s-a.s);
+  return `<div style="display:grid;gap:8px"><h3 style="margin:0">Victory race</h3>
+    <div class="vrow"><span>Conquest</span><span>${alive.length-1} rival${alive.length===2?'':'s'} left</span></div>
+    <div class="vrow"><span>Domination · ${dn} systems</span><span>You ${sysCount(0)} · leader <b style="color:${EMP_META[domLead].col}">${EMP_META[domLead].short}</b> ${sysCount(domLead)}</span></div>
+    <div class="vrow"><span>Ascension Gate</span><span>${gateR[0]&&gateR[0].p>0?`<b style="color:${EMP_META[gateR[0].e].col}">${EMP_META[gateR[0].e].short}</b> ${Math.round(gateR[0].p*100)}%`:canResearch(0,TECH.gate)?'Available to you':'Not started'}</span></div>
+    <div class="vrow"><span>Score at turn ${G.limit}</span><span>${sc.slice(0,3).map(x=>`<b style="color:${EMP_META[x.e].col}">${EMP_META[x.e].short}</b> ${x.s}`).join(' · ')}</span></div>
+    <p class="dim" style="font-size:12.5px">Rivals can win these too. Score counts systems, population, research and fleet power.</p></div>`;
+}
+function logHTML(){
+  const cnt=e=>sysCount(e);
+  return `<div><div class="eyebrow">Turn ${G.turn}</div><h2>Reports</h2></div>
+  <div><h3>Galactic standings</h3><div class="stand">${realE().map(e=>{const m=EMP_META[e];return `<div><span><b style="color:${m.col}">${e?m.name.replace('the ',''):esc(m.name)}</b><br><span class="dim" style="font-size:12.5px">${GOV[govOf(e)].name}${e?` · ${relOf(0,e)==='war'?'at war':relOf(0,e)==='trade'?'trade partner':'at peace'}`:''}</span></span><span class="dim">${G.emp[e].alive?plural(cnt(e),'system'):'Eliminated'}</span></div>`}).join('')}</div></div>
+  <div><h3>Dispatches</h3><ul class="log">${G.log.slice(0,60).map(l=>`<li><time>T${l.t}</time><span class="${l.tone}">${l.msg}</span></li>`).join('')}</ul></div>`;
+}
+function renderSum(){
+  const el=$('#sum');if(!showSum||!G.sum||G.over){el.hidden=true;return}
+  const S=G.sum,ev=S.ev,max=5;
+  el.innerHTML=`<div class="hd"><b>Turn ${S.turn}</b><button class="ghost" type="button" id="sumClose">Close</button></div>
+    <div class="nums">+${S.inc} credits · +${S.r} research</div>
+    ${ev.length?`<ul>${ev.slice(-max).map(l=>`<li class="${l.tone==='good'?'good':l.tone==='bad'?'bad':''}">${l.msg}</li>`).join('')}</ul>${ev.length>max?`<span class="dim">+${ev.length-max} more in Reports</span>`:''}`:'<span class="dim">A quiet turn.</span>'}`;
+  el.hidden=false;$('#sumClose').onclick=hideSum;clearTimeout(toastT);$('#toast').hidden=true;
+}
+function render(){
+  const E=G.emp[0],inc=income(0),sp=sprawl(0);
+  $('#stats').innerHTML=`<span style="color:${EMP_META[0].col}">${esc(G.player.name)}</span><span>Turn <b>${G.turn}</b>/${G.limit}</span><span>Credits <b>${E.credits}</b> <span class="up">+${inc.c}</span></span><span>Research <b>${E.focus&&TECH[E.focus]?TECH[E.focus].name:'—'}</b> <span class="up">+${inc.r}</span></span><span>Systems <b>${sysCount(0)}</b></span><span>Capacity <b style="${sp.over?'color:var(--bad)':''}">${fmtN(sp.use)}/${sp.cap}</b>${sp.over?` <span style="color:var(--bad)">−${Math.round(sp.pen*100)}%</span>`:''}</span>`;
+  if(tab==='log')unread=false;
+  const offersN=G.offers.filter(o=>o.to===0).length;
+  document.querySelectorAll('.tab').forEach(t=>{t.setAttribute('aria-selected',t.dataset.tab===tab);
+    if(t.dataset.tab==='log')t.innerHTML='Reports'+(unread?'<span class="dot"></span>':'');
+    if(t.dataset.tab==='emp')t.innerHTML='Empire'+(offersN?'<span class="dot"></span>':'')});
+  $('#pbody').innerHTML=tab==='sys'?sysHTML():tab==='res'?resHTML():tab==='emp'?empHTML():logHTML();
+  $('#banner').hidden=!tmode;
+  if(tmode)$('#bannerTxt').textContent=warships(tmode.n)?`Tap a destination · your strength ${r1(fleetPow(0,{...tmode.n,adm:tmode.adm}))}`:'Tap a destination system';
+  $('#endBtn').disabled=!!G.over;
+  renderSum();
+  const ov=$('#over');
+  if(setupOpen){}
+  else if(G.over){const O=G.over,win=O.res==='win',by=O.by!=null?ename(O.by):'';
+    const msg={conquest:`Every rival empire has fallen. The ${esc(G.player.cit)} rule the galaxy.`,
+      domination:win?`You control ${sysCount(0)} of ${G.stars.length} systems. The galaxy bows to the ${esc(G.player.cit)}.`:`${capName(O.by)} controls most of the galaxy.`,
+      tech:win?`The Ascension Gate is complete. The ${esc(G.player.cit)} step beyond the stars.`:`${capName(O.by)} completed the Ascension Gate and left the rest of the galaxy behind.`,
+      score:win?`Turn ${G.limit} reached. Your empire has the highest score: ${score(0)}.`:`Turn ${G.limit} reached. ${capName(O.by)} finished with the highest score.`,
+      elim:`Your last system has fallen. The ${esc(G.player.name)} is no more.`}[O.how]||'';
+    ov.hidden=false;ov.innerHTML=`<div class="card"><div class="eyebrow">Turn ${G.turn} · ${{conquest:'Conquest',domination:'Domination',tech:'Ascension',score:'Score',elim:'Eliminated'}[O.how]||''}</div><h2>${win?'Victory':'Defeat'}</h2>
+    <p class="dim">${msg}</p>
+    <button class="btn primary" type="button" id="again">New galaxy</button></div>`;$('#again').onclick=()=>openSetup(false);}
+  else ov.hidden=true;
+  draw();
+}
+
+$('#pbody').addEventListener('click',ev=>{
+  const b=ev.target.closest('button');if(!b||b.disabled)return;hideSum();
+  const nm=sel!=null?G.stars[sel].name:'';
+  if(b.dataset.b){const k=b.dataset.b;if(build(0,sel,k)){
+      showToast(BLD[k]?`${BLD[k].name} built at ${nm}.`:k==='def'?`Defenses raised at ${nm}.`:k==='yard'?`Shipyard built at ${nm}. Your borders now reach its neighbours.`:k==='hub'?`Administrative hub opened at ${nm}. Empire capacity +3.`:`${SHIPS[k].name} launched at ${nm}.`);resetSend();save();render()}}
+  else if(b.dataset.s){const f=idleFleet(sel);if(!f)return;const k=b.dataset.s.slice(0,-1),up=b.dataset.s.endsWith('+');send[k]=clamp(send[k]+(up?1:-1),0,f[k]||0);render()}
+  else if(b.dataset.go){const f=idleFleet(sel);if(f&&KEYS.some(k=>send[k]>0)){tmode={id:f.id,n:{...send},adm:warships(send)?f.adm:null};render()}}
+  else if(b.dataset.claim){if(claim(0,sel)){showToast(`Claiming ${nm}. It will be yours in ${CLAIM_TURNS} turns if no enemy warships arrive.`);save();render()}}
+  else if(b.dataset.halt){const f=G.fleets.find(x=>x.id===+b.dataset.halt);if(f){f.path=[];f.colTarget=null;mergeFleets();resetSend();save();render()}}
+  else if(b.dataset.t){G.emp[0].focus=b.dataset.t;save();render()}
+  else if(b.dataset.dip){const x=+b.dataset.x,a=b.dataset.dip;
+    if(a==='war'){declareWar(0,x);showToast(`You are now at war with ${ename(x)}.`)}
+    else if(a==='peace'){G.asked[x]=G.turn;if(aiAcceptsPeace(x,0)&&Math.random()<.75){makePeace(0,x);showToast(`${capName(x)} accepted peace.`)}else{bumpAtt(x,0,-2);showToast(`${capName(x)} refused peace.`)}}
+    else if(a==='trade'){G.asked[x]=G.turn;if(aiAcceptsTrade(x,0)){setRel(0,x,'trade');addLog(`Trade agreement signed with ${ename(x)}.`,'good');showToast(`${capName(x)} agreed to trade.`)}else showToast(`${capName(x)} declined to trade. Improve relations first.`)}
+    else if(a==='untrade'){setRel(0,x,'peace');bumpAtt(x,0,-10);showToast(`Trade with ${ename(x)} cancelled.`)}
+    save();render()}
+  else if(b.dataset.offer!=null){const o=G.offers[+b.dataset.offer];if(o){
+    if(b.dataset.ans==='yes'){if(o.type==='peace')makePeace(o.from,0);else{setRel(o.from,0,'trade');addLog(`Trade agreement signed with ${ename(o.from)}.`,'good')}}
+    else{bumpAtt(o.from,0,-3);G.offers=G.offers.filter(z=>z!==o)}
+    save();render()}}
+  else if(b.dataset.hire!=null){if(hire(+b.dataset.hire)){showToast('Leader hired. Assign them from a fleet or colony panel.');save();render()}}
+  else if(b.dataset.fire!=null){const id=+b.dataset.fire;unassign(id);G.leaders=G.leaders.filter(l=>l.id!==id);save();render()}
+});
+$('#pbody').addEventListener('change',ev=>{
+  const t=ev.target;if(!t.matches('select'))return;const id=t.value?+t.value:null;
+  if(t.id==='admSel'){const f=idleFleet(sel);if(!f)return;if(id)unassign(id);f.adm=id}
+  else if(t.id==='govSel'){const s=G.stars[sel];if(id)unassign(id);s.gov=id}
+  save();render();
+});
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{tab=t.dataset.tab;render()}));
+$('#endBtn').addEventListener('click',()=>{tmode=null;endTurn()});
+$('#newBtn').addEventListener('click',()=>openSetup(true));
+
+/* ---------- setup ---------- */
+function seg(name,entries,cur){return `<div class="seg">${entries.map(([k,l])=>`<label><input type="radio" name="${name}" id="${name}-${k}" value="${k}" ${String(k)===String(cur)?'checked':''}><span>${l}</span></label>`).join('')}</div>`}
+function openSetup(canCancel){
+  setupOpen=true;const P=G&&G.player?{...DEFAULT_PLAYER,...G.player}:DEFAULT_PLAYER,ov=$('#over');
+  ov.hidden=false;
+  ov.innerHTML=`<form class="card setup" id="setup" novalidate>
+    <div><div class="eyebrow">New galaxy</div><h2>Found your empire</h2></div>
+    <div class="field"><label class="lbl" for="empName">Empire name</label>
+      <input type="text" id="empName" maxlength="28" autocomplete="off" placeholder="Solar Ascendancy" value="${canCancel?'':esc(P.name)}"></div>
+    <div class="field"><label class="lbl" for="citName">Your citizens are called</label>
+      <input type="text" id="citName" maxlength="22" autocomplete="off" placeholder="Solarians" value="${canCancel?'':esc(P.cit)}"></div>
+    <fieldset><legend>Empire colour</legend><div class="swatches">${PLAYER_COLS.map(([n,c])=>
+      `<label class="sw" title="${n}"><input type="radio" name="ecol" id="col-${n.toLowerCase()}" value="${c}" aria-label="${n}" ${c===P.col?'checked':''}><span style="--c:${c}"></span></label>`).join('')}</div>
+      <p class="dim" style="font-size:13px">Red and teal belong to your rivals. Extra rivals take colours you don't pick.</p></fieldset>
+    <fieldset><legend>Government</legend><div class="govs">${Object.entries(GOV).filter(([k])=>k!=='council').map(([k,g])=>
+      `<label class="opt"><input type="radio" name="gov" id="gov-${k}" value="${k}" ${k===P.gov?'checked':''}><span><b>${g.name}</b><small>${g.desc}</small></span></label>`).join('')}</div></fieldset>
+    <fieldset><legend>Galaxy size</legend>${seg('gsize',Object.entries(SIZES).map(([k,z])=>[k,z.label]),P.size)}<p class="dim" style="font-size:13px" id="sizeNote"></p></fieldset>
+    <fieldset><legend>Shape</legend>${seg('shape',Object.entries(SHAPES),P.shape)}</fieldset>
+    <fieldset><legend>Rivals</legend>${seg('nriv',[1,2,3,4,5].map(n=>[n,n]),P.rivals)}</fieldset>
+    <fieldset><legend>Difficulty</legend>${seg('diff',Object.entries(DIFF).map(([k,z])=>[k,z.label]),P.diff)}<p class="dim" style="font-size:13px" id="diffNote"></p></fieldset>
+    <div class="preview" id="pv"></div>
+    <div class="acts">${canCancel?'<button class="btn" type="button" id="setCancel">Cancel</button>':''}<button class="btn primary" type="submit">Launch</button></div>
+  </form>`;
+  const f=$('#setup'),nm=$('#empName'),ct=$('#citName');
+  const q=n=>(f.querySelector(`input[name=${n}]:checked`)||{}).value;
+  const val=()=>({name:nm.value.trim()||nm.placeholder,cit:ct.value.trim()||ct.placeholder,col:q('ecol')||PLAYER_COLS[0][1],gov:q('gov')||'democracy',size:q('gsize')||'medium',shape:q('shape')||'scatter',rivals:+(q('nriv')||2),diff:q('diff')||'normal'});
+  const pv=()=>{const v=val(),z=SIZES[v.size];$('#pv').style.setProperty('--pc',v.col);
+    $('#pv').innerHTML=`<i></i><span>The <b style="color:${v.col}">${esc(v.cit)}</b> of the <b style="color:${v.col}">${esc(v.name)}</b>, a ${GOV[v.gov].name}, look to the stars.</span>`;
+    $('#sizeNote').textContent=`${z.n} systems · score victory at turn ${z.limit}${z.n>40?' · drag and pinch to explore':''}`;
+    $('#diffNote').textContent=v.diff==='hard'?'Rivals start at war with everyone, earn 25% more and attack early.':v.diff==='easy'?'Rivals earn 20% less and are slow to start wars.':'Empires start at peace. Wars break out as borders meet.';};
+  f.addEventListener('input',pv);pv();
+  if(canCancel)$('#setCancel').onclick=()=>{setupOpen=false;render()};
+  f.addEventListener('submit',e=>{e.preventDefault();const v=val();
+    setupOpen=false;newGame(Date.now()%1e9|0,v);tab='sys';resize();render();showToast(`A new galaxy awaits the ${v.cit}.`);});
+  setTimeout(()=>{try{nm.focus()}catch(e){}},50);
+}
+
+window.addEventListener('resize',resize);
+function start(d){
+  let first=false;
+  if(d&&d.G){G=d.G;sel=d.sel??null;}
+  else if(!load()){newGame(Date.now()%1e9|0);first=true;}
+  else sel=G.stars.findIndex(s=>s.owner===0&&s.home);
+  if(sel<0)sel=null;
+  migrate();
+  updateVis();resetSend();camReset=true;resize();render();
+  if(first)openSetup(false);
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(draw);
+}
+try{window.claude?.hot?.snapshot?.(()=>({G,sel}))}catch(e){}
+window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
+})();
+</script>
+
+</body></html>

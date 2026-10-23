@@ -1,0 +1,429 @@
+<!doctype html><html><head><meta charset=utf8><meta name="robots" content="noindex"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Lantern Street</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: one-column survival console — status strip, tabbed panel, running log; modal for runs and fights. Single committed dark look (sodium lamp on wet slate). */
+:root{
+  --bg:#14171a; --panel:#1e2327; --line:#2f363c; --ink:#dcd6c8; --muted:#8a9096;
+  --amber:#e3a53c; --blood:#c9473d; --moss:#86a96f; --sky:#6f9fc4;
+  --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--body);font-size:15px;line-height:1.45;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 28px}
+.wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+h1{font-family:var(--display);font-weight:800;font-size:34px;letter-spacing:.02em;margin:0;line-height:1;text-transform:uppercase}
+h1 span{color:var(--amber)}
+.clock{font-family:var(--mono);font-size:13px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.clock b{color:var(--ink);font-size:18px;display:block}
+.clock .night{color:var(--sky)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px}
+.stat{display:flex;flex-direction:column;gap:3px}
+.stat .lab{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.stat .lab em{font-style:normal;font-family:var(--mono);color:var(--ink);letter-spacing:0;font-variant-numeric:tabular-nums}
+.bar{height:7px;background:var(--line);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;transition:width .3s}
+.low .lab em{color:var(--blood)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line)}
+.tabs button{flex:1;background:none;border:0;color:var(--muted);font-family:var(--display);font-weight:600;font-size:18px;text-transform:uppercase;letter-spacing:.06em;padding:8px 4px;border-bottom:3px solid transparent;cursor:pointer}
+.tabs button.on{color:var(--ink);border-color:var(--amber)}
+.panel{display:flex;flex-direction:column;gap:10px;min-height:260px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;background:var(--panel);border:1px solid var(--line);border-radius:4px}
+.row .t{min-width:0}
+.row .t b{display:block;font-weight:600}
+.row .t small{color:var(--muted);font-size:13px}
+.sec{font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:6px 0 -2px}
+button.act{background:var(--amber);color:#1a1408;border:0;border-radius:3px;font-family:var(--body);font-weight:600;font-size:14px;padding:8px 12px;cursor:pointer;white-space:nowrap}
+button.act.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button.act.red{background:var(--blood);color:#fff}
+button.act:disabled{opacity:.35;cursor:not-allowed}
+button:focus-visible{outline:2px solid var(--sky);outline-offset:2px}
+.btns{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.danger{font-family:var(--mono);font-size:12px;color:var(--blood);letter-spacing:.1em}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--mono);font-size:12px;background:var(--panel);border:1px solid var(--line);padding:3px 7px;border-radius:3px}
+.log{border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:4px;font-size:14px}
+.log p{margin:0;color:var(--muted)}
+.log p:first-child{color:var(--ink)}
+.log p i{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--amber);margin-right:6px}
+.modal{position:fixed;inset:0;background:rgba(8,10,12,.82);display:flex;align-items:center;justify-content:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));z-index:20}
+.card{background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--amber);border-radius:4px;max-width:440px;width:100%;padding:18px;display:flex;flex-direction:column;gap:12px;max-height:100%;overflow:auto}
+.card.fight{border-top-color:var(--blood)}
+.card h2{font-family:var(--display);font-weight:800;font-size:26px;text-transform:uppercase;margin:0;line-height:1.05;text-wrap:balance}
+.card p{margin:0}
+.muted{color:var(--muted)}
+.foe{display:flex;flex-direction:column;gap:4px}
+.foe .bar i{background:var(--blood)}
+.art svg{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:4px}
+.art text{font-family:var(--mono);font-size:10px;fill:var(--ink)}
+.pin{cursor:pointer}
+.pin:hover circle.dot{stroke:var(--ink);stroke-width:2}
+.smoke{animation:rise 3s linear infinite;opacity:0}
+.smoke:nth-of-type(2){animation-delay:1s}.smoke:nth-of-type(3){animation-delay:2s}
+@keyframes rise{0%{transform:translate(0,0);opacity:.6}100%{transform:translate(8px,-30px);opacity:0}}
+.flash{animation:fl .35s}
+@keyframes fl{0%{background:rgba(201,71,61,.35)}100%{background:var(--panel)}}
+@media (prefers-reduced-motion:reduce){.flash,.smoke{animation:none}.smoke{opacity:.4}.bar i{transition:none}}
+@media (max-width:420px){h1{font-size:28px}.row{flex-wrap:wrap}.btns{width:100%;justify-content:flex-start}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Lantern <span>Street</span></h1>
+    <div class="clock" id="clock"></div>
+  </header>
+  <div class="stats" id="stats"></div>
+  <nav class="tabs" id="tabs">
+    <button data-tab="home" id="tab-home">Shelter</button>
+    <button data-tab="map" id="tab-map">Map</button>
+    <button data-tab="pack" id="tab-pack">Pack</button>
+  </nav>
+  <section class="panel" id="panel"></section>
+  <div class="log" id="log"></div>
+</div>
+<div class="modal" id="modal" hidden><div class="card" id="card"></div></div>
+
+<script>
+const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const ITEMS={
+  can:{n:"Canned beans",kind:"food",use:{food:30}},
+  veg:{n:"Garden greens",kind:"food",use:{food:15,water:5}},
+  meat:{n:"Raw meat",kind:"food",use:{food:15,hp:-8},note:"Cook it first"},
+  meal:{n:"Hot stew",kind:"food",use:{food:45,stam:8}},
+  water:{n:"Clean water",kind:"drink",use:{water:35}},
+  dirty:{n:"Dirty water",kind:"drink",use:{water:22},risk:.4,note:"Boil it first"},
+  coffee:{n:"Instant coffee",kind:"drink",use:{stam:25,water:5}},
+  bandage:{n:"Bandage",kind:"med",use:{hp:20}},
+  meds:{n:"Antibiotics",kind:"med",use:{hp:45}},
+  wood:{n:"Planks",kind:"mat"},metal:{n:"Scrap metal",kind:"mat"},
+  cloth:{n:"Cloth",kind:"mat"},seeds:{n:"Seed packet",kind:"mat"},
+  knife:{n:"Kitchen knife",kind:"wpn",dmg:8},pipe:{n:"Lead pipe",kind:"wpn",dmg:12},
+  bat:{n:"Spiked bat",kind:"wpn",dmg:15},crowbar:{n:"Crowbar",kind:"wpn",dmg:17},
+  machete:{n:"Machete",kind:"wpn",dmg:23}
+};
+const SITES=[
+  {id:"store",n:"Corner Store",d:1,dng:1,rooms:5,loot:[["can",5,1,2],["water",4,1,2],["coffee",2,1,1],["cloth",2,1,2],["knife",1,1,1]]},
+  {id:"lumber",n:"Lumber Yard",d:1,dng:1,rooms:5,loot:[["wood",7,2,3],["metal",2,1,1],["seeds",2,1,1],["dirty",2,1,2]]},
+  {id:"homes",n:"Row Houses",d:2,dng:2,rooms:6,loot:[["can",3,1,1],["cloth",4,1,3],["dirty",3,1,2],["meat",2,1,1],["bandage",2,1,1],["seeds",1,1,1],["pipe",1,1,1]]},
+  {id:"hardware",n:"Hardware Depot",d:2,dng:2,rooms:6,loot:[["metal",6,1,3],["wood",4,1,3],["crowbar",1,1,1],["seeds",2,1,1]]},
+  {id:"pharmacy",n:"Pharmacy",d:3,dng:3,rooms:4,loot:[["bandage",5,1,2],["meds",3,1,1],["water",2,1,1],["coffee",2,1,1]]},
+  {id:"market",n:"Night Market",d:3,dng:3,rooms:5,loot:[["meat",4,1,2],["can",4,1,3],["water",3,1,2],["cloth",2,2,3]]},
+  {id:"precinct",n:"Old Precinct",d:4,dng:4,rooms:5,loot:[["machete",1,1,1],["meds",3,1,1],["metal",3,2,3],["can",3,1,2],["bandage",3,1,2]]}
+];
+const FOES=[
+  {n:"Shambler",hp:20,lo:4,hi:8,min:1},
+  {n:"Feral dog",hp:16,lo:5,hi:9,min:1},
+  {n:"Runner",hp:30,lo:6,hi:12,min:2},
+  {n:"Scavenger",hp:36,lo:8,hi:13,min:2},
+  {n:"Bloated brute",hp:55,lo:10,hi:16,min:3},
+  {n:"Raider captain",hp:48,lo:12,hi:18,min:4}
+];
+const RECIPES=[
+  {id:"bandage",n:"Bandage",need:{cloth:2},h:1,out:{bandage:1}},
+  {id:"bat",n:"Spiked bat",need:{wood:2,metal:1},h:2,out:{bat:1}},
+  {id:"meal",n:"Hot stew",need:{meat:1,wood:1},h:1,out:{meal:1},req:"stove"},
+  {id:"boil",n:"Boil water ×2",need:{dirty:2,wood:1},h:1,out:{water:2},req:"stove"}
+];
+const BUILDS=[
+  {id:"stove",n:"Stove",desc:"Cook meat, boil water",max:1,cost:l=>({metal:3,wood:2}),h:3},
+  {id:"fence",n:"Barricade",desc:"Holds off raids",max:5,cost:l=>({wood:3+l*2,metal:1+l}),h:3},
+  {id:"barrel",n:"Rain barrel",desc:"Fills with clean water each dawn",max:2,cost:l=>({metal:2,cloth:2,wood:2}),h:2},
+  {id:"garden",n:"Garden bed",desc:"Grows greens each dawn",max:3,cost:l=>({wood:3,seeds:1}),h:2}
+];
+let S, tab="home", modalState=null;
+function fresh(){
+  const sites={};SITES.forEach(s=>sites[s.id]=s.rooms);
+  return {day:1,hour:8,hp:100,food:75,water:70,stam:90,inv:{can:2,water:2,wood:2,cloth:1},home:{stove:0,fence:0,barrel:0,garden:0},weapon:null,at:null,sites,lastRaid:0,log:[],dead:false,kills:0};
+}
+function save(){try{localStorage.setItem("lantern-save",JSON.stringify(S))}catch(e){}}
+function load(){try{const s=JSON.parse(localStorage.getItem("lantern-save"));if(s&&!s.dead)return s}catch(e){}return null}
+function best(v){try{if(v!=null){const b=+localStorage.getItem("lantern-best")||0;if(v>b)localStorage.setItem("lantern-best",v)}return +localStorage.getItem("lantern-best")||0}catch(e){return 0}}
+
+function log(t){S.log.unshift({d:S.day,h:S.hour,t});S.log=S.log.slice(0,40)}
+function has(need){return Object.entries(need).every(([k,v])=>(S.inv[k]||0)>=v)}
+function take(need){for(const [k,v] of Object.entries(need)){S.inv[k]-=v;if(S.inv[k]<=0)delete S.inv[k]}}
+function give(id,q){S.inv[id]=(S.inv[id]||0)+q}
+function wdmg(){return S.weapon?ITEMS[S.weapon].dmg:4}
+function night(h=S.hour){return h>=21||h<5}
+function costTxt(c){return Object.entries(c).map(([k,v])=>`${v} ${ITEMS[k].n.toLowerCase()}`).join(", ")}
+
+function passTime(h,sleeping=false){
+  for(let i=0;i<h&&!S.dead;i++){
+    S.hour++;
+    if(S.hour>=24){S.hour=0;S.day++;newDay()}
+    S.food-=sleeping?1:2; S.water-=sleeping?1.5:3;
+    S.stam+=sleeping?12:-1;
+    if(S.food<=0||S.water<=0){S.hp-=4}
+    else if(S.food>50&&S.water>50){S.hp+=sleeping?2:1}
+    S.food=clamp(S.food,0,100);S.water=clamp(S.water,0,100);S.stam=clamp(S.stam,0,100);S.hp=clamp(S.hp,0,100);
+    if(S.hour===6)dawn();
+    raidCheck();
+    if(S.hp<=0)die(S.food<=0||S.water<=0?"You wasted away from hunger and thirst.":"Your wounds were too much.");
+  }
+}
+function newDay(){if(S.day%2===0)SITES.forEach(s=>S.sites[s.id]=Math.min(s.rooms,S.sites[s.id]+1))}
+function dawn(){
+  const b=S.home.barrel,g=S.home.garden,bits=[];
+  if(b){give("water",b);bits.push(`${b} water from the barrel`)}
+  if(g){give("veg",g);bits.push(`${g} greens from the garden`)}
+  if(bits.length)log(`Dawn. You collected ${bits.join(" and ")}.`)
+}
+const RAIDS=[
+  {n:"Scavenger scouts",w:50,lo:10,hi:25,loot:1},
+  {n:"Raiding party",w:35,lo:30,hi:50,loot:2},
+  {n:"Horde",w:15,lo:55,hi:85,loot:4}
+];
+function raidCheck(){
+  const now=S.day*24+S.hour;
+  if(now-(S.lastRaid||0)<10)return;
+  if(Math.random()<(night()?.07:.015)){S.lastRaid=now;raid()}
+}
+function raid(){
+  let r=Math.random()*100,t=RAIDS[0];for(const x of RAIDS){r-=x.w;if(r<=0){t=x;break}}
+  const str=R(t.lo,t.hi), athome=S.at===null, when=night()?"in the dark":"in broad daylight";
+  const def=S.home.fence*14+(athome?wdmg()*1.5:0);
+  if(def>=str){log(`Raid! ${t.n} hit the shelter ${when} (${str} vs ${Math.round(def)} defence) and gave up.`);return}
+  if(athome){
+    const dmg=Math.min(45,Math.round((str-def)*.8));S.hp=clamp(S.hp-dmg,0,100);
+    const lost=stealSome(Math.max(1,t.loot-1));
+    log(`Raid! ${t.n} broke through ${when}. You fought them off but lost ${dmg} health${lost?` and ${lost}`:""}.`);
+  }else{
+    const lost=stealSome(t.loot+1);
+    log(`While you were out, ${t.n.toLowerCase()} ransacked the shelter${lost?` and took ${lost}`:""}.`);
+  }
+}
+function stealSome(n){
+  const keys=Object.keys(S.inv).filter(k=>ITEMS[k].kind!=="wpn");const out=[];
+  for(let i=0;i<n&&keys.length;i++){const k=keys.splice(R(0,keys.length-1),1)[0];const q=Math.max(1,Math.ceil(S.inv[k]/2));S.inv[k]-=q;if(S.inv[k]<=0)delete S.inv[k];out.push(`${q} ${ITEMS[k].n.toLowerCase()}`)}
+  return out.join(", ");
+}
+function die(why){S.dead=true;const b=best(S.day);modalState={type:"dead",why,best:b};try{localStorage.removeItem("lantern-save")}catch(e){}}
+
+/* ---------- actions ---------- */
+const A={
+  tab(t){tab=t},
+  sleep(){if(night()||S.stam<60){log("You bar the door and sleep.");passTime(8,true)}else{log("You rest for a few hours.");passTime(3,true)}},
+  use(id){
+    const it=ITEMS[id];if(!S.inv[id])return;
+    if(it.kind==="wpn"){S.weapon=S.weapon===id?null:id;log(S.weapon?`You equip the ${it.n.toLowerCase()}.`:"You put the weapon away.");return}
+    take({[id]:1});
+    for(const [k,v] of Object.entries(it.use))S[k]=clamp(S[k]+v,0,100);
+    let msg=`You use the ${it.n.toLowerCase()}.`;
+    if(it.risk&&Math.random()<it.risk){S.hp=clamp(S.hp-12,0,100);msg+=" Your stomach turns. (−12 health)"}
+    log(msg);
+  },
+  craft(id){const r=RECIPES.find(x=>x.id===id);take(r.need);for(const[k,v]of Object.entries(r.out))give(k,v);log(`You made ${r.n.toLowerCase()}.`);passTime(r.h)},
+  build(id){const b=BUILDS.find(x=>x.id===id),l=S.home[id];take(b.cost(l));S.home[id]++;S.stam=clamp(S.stam-10,0,100);log(`You built ${b.n.toLowerCase()} (level ${S.home[id]}).`);passTime(b.h)},
+  go(id){
+    const s=SITES.find(x=>x.id===id);S.stam=clamp(S.stam-s.d*4,0,100);
+    log(`You set out for the ${s.n}.`);passTime(s.d);if(S.dead)return;
+    S.at=id;modalState={type:"site"};
+    if(Math.random()<s.dng*.08+(night()?.15:0))startFight(s.dng,"Something was waiting on the way in.");
+  },
+  search(){
+    const s=SITES.find(x=>x.id===S.at);S.stam=clamp(S.stam-8,0,100);S.sites[s.id]--;passTime(1);if(S.dead)return;
+    const got=[];const n=R(1,2);
+    for(let i=0;i<n;i++){const tot=s.loot.reduce((a,l)=>a+l[1],0);let r=Math.random()*tot;for(const l of s.loot){r-=l[1];if(r<=0){const q=R(l[2],l[3]);give(l[0],q);got.push(`${q} ${ITEMS[l[0]].n.toLowerCase()}`);break}}}
+    const m=`You searched a room: ${got.join(", ")}.`;log(m);modalState={type:"site",msg:m};
+    if(Math.random()<.1+s.dng*.1+(night()?.15:0))startFight(s.dng,"Something heard you rummaging.");
+  },
+  leave(){
+    const s=SITES.find(x=>x.id===S.at);S.stam=clamp(S.stam-s.d*4,0,100);passTime(s.d);if(S.dead)return;
+    S.at=null;modalState=null;log(`You made it back to the shelter from the ${s.n}.`);
+    if(Math.random()<s.dng*.06+(night()?.12:0))startFight(Math.max(1,s.dng-1),"You were followed home.",true);
+  },
+  hit(){
+    const f=modalState.foe;const d=wdmg()+R(0,4);f.hp-=d;S.stam=clamp(S.stam-3,0,100);
+    let m=`You hit the ${f.n.toLowerCase()} for ${d}.`;
+    if(f.hp<=0){return winFight(m)}
+    m+=foeTurn(f);modalState.msg=m;modalState.flash=true;
+  },
+  flee(){
+    const f=modalState.foe;
+    if(Math.random()<.55){log(`You slipped away from the ${f.n.toLowerCase()}.`);endFight();return}
+    modalState.msg="You couldn't get away."+foeTurn(f);modalState.flash=true;
+  },
+  close(){modalState=null},
+  restart(){S=fresh();tab="home";modalState={type:"intro"};log("Day one. The power has been out for weeks. The shelter is yours now.")}
+};
+function startFight(dng,why,home=false){
+  const pool=FOES.filter(f=>f.min<=dng);const b=pool[R(0,pool.length-1)];
+  const foe={...b,hp:b.hp+dng*4,max:b.hp+dng*4};
+  modalState={type:"fight",foe,msg:why,ret:home?null:"site"};
+}
+function foeTurn(f){
+  if(Math.random()<.72){const d=R(f.lo,f.hi);S.hp=clamp(S.hp-d,0,100);if(S.hp<=0){die(`Killed by a ${f.n.toLowerCase()}.`);return ""}return ` It hits you for ${d}.`}
+  return " It misses."
+}
+function winFight(m){
+  const f=modalState.foe;S.kills++;let drop="";
+  if(Math.random()<.45){const k=["cloth","meat","metal","bandage"][R(0,3)];give(k,1);drop=` You find 1 ${ITEMS[k].n.toLowerCase()}.`}
+  log(`${m} The ${f.n.toLowerCase()} goes down.${drop}`);endFight(`${m} It goes down.${drop}`);
+}
+function endFight(msg){modalState=modalState.ret==="site"&&S.at?{type:"site",msg}:null}
+
+/* ---------- graphics ---------- */
+function sky(h){
+  if(h>=21||h<5)return["#0a121d","#18263b"];
+  if(h<7)return["#3a3450","#c4794a"];
+  if(h<17)return["#577790","#a7b6bc"];
+  if(h<19)return["#46405e","#d1854a"];
+  return["#192138","#3a3456"];
+}
+function skyDefs(id){const[a,b]=sky(S.hour);return `<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient><radialGradient id="${id}g"><stop offset="0" stop-color="#ffc35a" stop-opacity=".55"/><stop offset="1" stop-color="#ffc35a" stop-opacity="0"/></radialGradient></defs>`}
+function celestial(w){
+  if(night()){
+    const st=[[30,20],[70,40],[110,15],[160,30],[220,12],[250,45],[320,25],[190,52],[60,62]];
+    return st.map(([x,y])=>`<circle cx="${x*w/360}" cy="${y}" r="1" fill="#cfd8e6"/>`).join("")+`<circle cx="${w-60}" cy="32" r="11" fill="#e8e4d4"/><circle cx="${w-55}" cy="29" r="10" fill="${sky(S.hour)[0]}"/>`;
+  }
+  const p=clamp((S.hour-5)/16,0,1),x=20+p*(w-40),y=60-Math.sin(p*Math.PI)*42;
+  return `<circle cx="${x}" cy="${y}" r="12" fill="#f2c66b" opacity=".9"/>`;
+}
+function sceneSVG(){
+  const H=S.home,n=night();let s=`<svg viewBox="0 0 360 180" role="img" aria-label="Your shelter">${skyDefs("sk")}<rect width="360" height="180" fill="url(#sk)"/>${celestial(360)}`;
+  // skyline behind
+  s+=`<path d="M0 110 h30 v-30 h22 v18 h18 v-40 h26 v52 h30 v-24 h20 v34 h140 v-46 h24 v22 h30 v-12 h20 v26 v70 H0z" fill="#11161b" opacity=".75"/>`;
+  s+=`<rect y="140" width="360" height="40" fill="#24272a"/><rect y="140" width="360" height="2" fill="#30353a"/>`;
+  // shelter
+  if(H.stove){s+=`<rect x="214" y="52" width="11" height="22" fill="#2c3136"/><g fill="#9aa0a6"><circle class="smoke" cx="219" cy="48" r="5"/><circle class="smoke" cx="219" cy="48" r="6"/><circle class="smoke" cx="219" cy="48" r="4"/></g>`}
+  s+=`<polygon points="122,74 185,48 248,74" fill="#2c3136"/><rect x="130" y="72" width="110" height="68" fill="#3a3f45"/>`;
+  s+=`<rect x="130" y="72" width="110" height="3" fill="#2a2e33"/>`;
+  if(n)s+=`<circle cx="160" cy="98" r="34" fill="url(#skg)"/>`;
+  s+=`<rect x="149" y="88" width="22" height="20" fill="${n?"#f0b04a":"#24303b"}"/><path d="M160 88v20M149 98h22" stroke="#3a3f45" stroke-width="2"/>`;
+  s+=`<rect x="196" y="104" width="24" height="36" fill="#22272b"/><circle cx="215" cy="123" r="1.6" fill="#8a9096"/>`;
+  // barricade planks
+  const planks=H.fence*3;
+  for(let i=0;i<planks;i++){const left=i<8,x=left?18+i*13:252+(i-8)*13,tilt=(i%3-1)*3;
+    s+=`<rect x="${x}" y="${108+(i%2)*3}" width="9" height="${32-(i%2)*3}" fill="${i%2?"#6b5136":"#7a5d3e"}" transform="rotate(${tilt} ${x+4} 140)"/>`}
+  if(H.fence){s+=`<rect x="14" y="118" width="${Math.min(8,planks)*13+2}" height="4" fill="#4e3a27"/>`;if(planks>8)s+=`<rect x="248" y="118" width="${(planks-8)*13+2}" height="4" fill="#4e3a27"/>`}
+  // rain barrels
+  for(let i=0;i<H.barrel;i++){const x=150-i*22;s+=`<rect x="${x}" y="120" width="18" height="20" rx="2" fill="#4a5a66"/><ellipse cx="${x+9}" cy="120" rx="9" ry="3" fill="#6f9fc4"/><rect x="${x}" y="128" width="18" height="2" fill="#3a4852"/>`}
+  // garden beds
+  for(let i=0;i<H.garden;i++){const x=136+i*36;s+=`<rect x="${x}" y="152" width="30" height="9" fill="#4a3626"/>`;for(let j=0;j<4;j++)s+=`<path d="M${x+5+j*7} 152 q-2 -6 0 -9 M${x+5+j*7} 150 q4 -4 6 -3" stroke="#86a96f" stroke-width="1.6" fill="none"/>`}
+  // you (only if home)
+  if(S.at===null&&!n){s+=`<g fill="#14171a"><circle cx="235" cy="128" r="4"/><rect x="232" y="132" width="6" height="12" rx="2"/></g>`}
+  return s+`</svg>`;
+}
+const DCOL=["","#86a96f","#e3a53c","#d8763a","#c9473d"];
+function mapSVG(){
+  const W=360,Hh=230,cx=180,cy=115;let s=`<svg viewBox="0 0 ${W} ${Hh}" role="img" aria-label="City map"><rect width="${W}" height="${Hh}" fill="#191d21"/>`;
+  for(let x=0;x<W;x+=30)s+=`<path d="M${x} 0V${Hh}" stroke="#20252a"/>`;for(let y=0;y<Hh;y+=30)s+=`<path d="M0 ${y}H${W}" stroke="#20252a"/>`;
+  s+=`<path d="M0 160 C90 150 120 190 210 180 S320 140 360 150" stroke="#2a3b4a" stroke-width="10" fill="none" opacity=".8"/>`;
+  [1,2,3,4].forEach(d=>s+=`<ellipse cx="${cx}" cy="${cy}" rx="${d*36+12}" ry="${d*22+8}" fill="none" stroke="#2a3036" stroke-dasharray="2 5"/>`);
+  const pts=SITES.map((st,i)=>{const a=i*(2*Math.PI/SITES.length)-Math.PI/2+.3;return{st,x:cx+Math.cos(a)*(st.d*36+12),y:cy+Math.sin(a)*(st.d*22+8)}});
+  pts.forEach(p=>s+=`<path d="M${cx} ${cy} L${p.x} ${p.y}" stroke="#3a4148" stroke-width="2"/>`);
+  s+=`<circle cx="${cx}" cy="${cy}" r="16" fill="url(#skg)"/><polygon points="${cx-8},${cy} ${cx},${cy-8} ${cx+8},${cy}" fill="#e3a53c"/><rect x="${cx-6}" y="${cy}" width="12" height="8" fill="#e3a53c"/><text x="${cx}" y="${cy+20}" text-anchor="middle" fill="#e3a53c">Shelter</text>`;
+  s=s.replace(`<rect width="${W}"`,`<defs><radialGradient id="skg"><stop offset="0" stop-color="#ffc35a" stop-opacity=".5"/><stop offset="1" stop-color="#ffc35a" stop-opacity="0"/></radialGradient></defs><rect width="${W}"`);
+  pts.forEach(({st,x,y})=>{const left=S.sites[st.id],dis=S.stam<st.d*4+8;const lx=clamp(x,40,W-40),ly=y<cy?y-12:y+20;
+    s+=`<g class="pin" data-act="go" data-arg="${st.id}" ${dis?'data-dis="1" opacity=".45"':""}><circle cx="${x}" cy="${y}" r="16" fill="transparent"/><circle class="dot" cx="${x}" cy="${y}" r="8" fill="${left?DCOL[st.dng]:"#191d21"}" stroke="${DCOL[st.dng]}" stroke-width="2"/><text x="${lx}" y="${ly}" text-anchor="middle">${st.n}</text></g>`});
+  return s+`</svg>`;
+}
+function siteSVG(id){
+  let s=`<svg viewBox="0 0 300 100" role="img" aria-label="Location">${skyDefs("ss")}<rect width="300" height="100" fill="url(#ss)"/>${celestial(300)}<rect y="84" width="300" height="16" fill="#24272a"/>`;
+  const B="#1b2024",win=(x,y)=>`<rect x="${x}" y="${y}" width="8" height="9" fill="${(x*7+y*3)%10<3?"#0d1013":"#2a3138"}"/>`;
+  if(id==="store"){s+=`<rect x="90" y="42" width="120" height="42" fill="${B}"/><polygon points="84,50 216,50 206,60 94,60" fill="#7a3a34"/><rect x="104" y="64" width="34" height="20" fill="#2a3138"/><rect x="160" y="64" width="20" height="20" fill="#0d1013"/>`}
+  else if(id==="lumber"){for(let i=0;i<5;i++)s+=`<rect x="${60+i*8}" y="${78-i*6}" width="${80-i*16}" height="6" fill="#6b5136"/>`;s+=`<rect x="170" y="38" width="70" height="46" fill="${B}"/><polygon points="166,40 205,22 244,40" fill="${B}"/>${win(186,52)}${win(216,52)}`}
+  else if(id==="homes"){for(let i=0;i<4;i++){const x=40+i*58;s+=`<rect x="${x}" y="44" width="54" height="40" fill="${B}"/><polygon points="${x-2},46 ${x+27},24 ${x+56},46" fill="${B}"/>${win(x+8,54)}${win(x+36,54)}<rect x="${x+21}" y="66" width="12" height="18" fill="#0d1013"/>`}}
+  else if(id==="hardware"){s+=`<rect x="50" y="34" width="200" height="50" fill="${B}"/><path d="M50 34 l25-10 h150 l25 10z" fill="#252a2f"/><rect x="90" y="54" width="40" height="30" fill="#2a3138"/><path d="M90 60h40M90 66h40M90 72h40" stroke="#1b2024"/><rect x="170" y="54" width="40" height="30" fill="#0d1013"/>`}
+  else if(id==="pharmacy"){s+=`<rect x="100" y="36" width="100" height="48" fill="${B}"/><rect x="142" y="18" width="16" height="16" fill="#86a96f" opacity=".7"/><path d="M150 21v10M145 26h10" stroke="#14171a" stroke-width="3"/>${win(114,48)}${win(178,48)}<rect x="136" y="60" width="28" height="24" fill="#0d1013"/>`}
+  else if(id==="market"){const c=["#7a3a34","#3e5a6e","#6b5136","#4d6a3e"];for(let i=0;i<4;i++){const x=45+i*55;s+=`<polygon points="${x},84 ${x+25},50 ${x+50},84" fill="${c[i]}"/><polygon points="${x+18},84 ${x+25},64 ${x+32},84" fill="#0d1013"/>`}s+=`<path d="M40 52 Q150 40 260 52" stroke="#4a4f55" fill="none"/>`;for(let i=0;i<7;i++)s+=`<circle cx="${60+i*30}" cy="${48-Math.sin(i/6*Math.PI)*5}" r="2" fill="${night()?"#f0b04a":"#4a4f55"}"/>`}
+  else{s+=`<rect x="80" y="30" width="140" height="54" fill="${B}"/><rect x="80" y="30" width="140" height="6" fill="#2a3a52"/>${[96,124,168,196].map(x=>win(x,44)).join("")}<rect x="138" y="58" width="24" height="26" fill="#0d1013"/><path d="M234 84V22" stroke="#4a4f55" stroke-width="2"/><polygon points="234,22 254,27 234,32" fill="#5a2e2a"/>`}
+  [[24,86,10],[236,90,14],[276,84,7]].forEach(([x,y,w])=>s+=`<rect x="${x}" y="${y}" width="${w}" height="3" fill="#30353a"/>`);
+  return s+`</svg>`;
+}
+function foeSVG(n){
+  const k="#0c0e10",eye=(x,y)=>`<circle cx="${x}" cy="${y}" r="1.8" fill="#ff5a4a"/>`;
+  let s=`<svg viewBox="0 0 160 100" role="img" aria-label="${n}"><defs><radialGradient id="fg"><stop offset="0" stop-color="#c9473d" stop-opacity=".35"/><stop offset="1" stop-color="#c9473d" stop-opacity="0"/></radialGradient></defs><rect width="160" height="100" fill="#15181b"/><ellipse cx="80" cy="55" rx="70" ry="45" fill="url(#fg)"/><rect y="88" width="160" height="12" fill="#22262a"/>`;
+  const human=(lean,extra,wide)=>`<g transform="rotate(${lean} 80 88)" fill="${k}" stroke="${k}" stroke-linecap="round"><circle cx="80" cy="24" r="9"/><rect x="${80-(wide?16:9)}" y="33" width="${wide?32:18}" height="${wide?34:30}" rx="${wide?12:4}"/><path d="M${80-(wide?14:8)} 38 l-12 22 M${80+(wide?14:8)} 38 l12 20" stroke-width="6" fill="none"/><path d="M75 64 l-5 24 M85 64 l5 24" stroke-width="7" fill="none"/>${extra}</g>${eye(77,23)}${eye(83,23)}`;
+  if(n==="Feral dog")s+=`<g fill="${k}" stroke="${k}"><ellipse cx="72" cy="62" rx="28" ry="11"/><circle cx="102" cy="52" r="9"/><polygon points="98,44 102,34 106,44"/><path d="M60 70 l-4 18 M68 70 l0 18 M84 70 l2 18 M92 68 l4 20 M46 58 q-12 -8 -14 -16" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M106 54 l8 2" stroke-width="5"/></g>${eye(104,50)}`;
+  else if(n==="Bloated brute")s+=human(0,"",true);
+  else if(n==="Runner")s+=human(14,"");
+  else if(n==="Scavenger")s+=human(0,`<path d="M100 58 l14 -26" stroke="#4a4f55" stroke-width="4"/>`);
+  else if(n==="Raider captain")s+=human(0,`<rect x="70" y="12" width="20" height="7" rx="2"/><path d="M100 58 l16 -30" stroke="#6b7076" stroke-width="3"/>`);
+  else s+=human(-8,"");
+  return s+`</svg>`;
+}
+
+/* ---------- render ---------- */
+const $=id=>document.getElementById(id);
+function render(){
+  const hh=String(S.hour).padStart(2,"0")+":00";
+  $("clock").innerHTML=`<b>Day ${S.day}</b><span class="${night()?"night":""}">${hh} · ${night()?"night":S.hour<12?"morning":S.hour<17?"afternoon":"evening"}</span>`;
+  const st=[["Health",S.hp,"var(--blood)"],["Food",S.food,"var(--amber)"],["Water",S.water,"var(--sky)"],["Stamina",S.stam,"var(--moss)"]];
+  $("stats").innerHTML=st.map(([n,v,c])=>`<div class="stat ${v<25?"low":""}"><div class="lab">${n}<em>${Math.round(v)}</em></div><div class="bar"><i style="width:${v}%;background:${c}"></i></div></div>`).join("");
+  document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===tab));
+  $("panel").innerHTML=tab==="home"?homeView():tab==="map"?mapView():packView();
+  $("log").innerHTML=S.log.slice(0,6).map(l=>`<p><i>D${l.d} ${String(l.h).padStart(2,"0")}h</i>${l.t}</p>`).join("");
+  renderModal();save();
+}
+function btn(act,label,arg="",cls="",dis=false){return `<button class="act ${cls}" data-act="${act}" data-arg="${arg}" ${dis?"disabled":""}>${label}</button>`}
+function homeView(){
+  let h=`<div class="art">${sceneSVG()}</div><div class="row"><div class="t"><b>Bedroll</b><small>${night()||S.stam<60?"Sleep 8 hours, restores stamina":"Rest 3 hours"}. Raids can come at any hour, mostly at night.</small></div>${btn("sleep",night()||S.stam<60?"Sleep":"Rest")}</div>`;
+  h+=`<div class="sec">Build</div>`;
+  for(const b of BUILDS){const l=S.home[b.id],c=b.cost(l),max=l>=b.max;
+    h+=`<div class="row"><div class="t"><b>${b.n} ${l?`<span class="muted">lv ${l}</span>`:""}</b><small>${b.desc}${max?" · maxed":` · ${costTxt(c)} · ${b.h}h`}</small></div>${max?"":btn("build",l?"Upgrade":"Build",b.id,"",!has(c))}</div>`}
+  h+=`<div class="sec">Workbench</div>`;
+  for(const r of RECIPES){const ok=has(r.need)&&(!r.req||S.home[r.req]);
+    h+=`<div class="row"><div class="t"><b>${r.n}</b><small>${costTxt(r.need)} · ${r.h}h${r.req&&!S.home[r.req]?" · needs stove":""}</small></div>${btn("craft","Make",r.id,"",!ok)}</div>`}
+  return h;
+}
+function mapView(){
+  let h=`<div class="art">${mapSVG()}</div><p class="muted" style="margin:0">Tap a pin or a row to go. Travel time is each way. Night runs are more dangerous, and an empty shelter is easy to rob.</p>`;
+  for(const s of SITES){const left=S.sites[s.id];
+    h+=`<div class="row"><div class="t"><b>${s.n}</b><small>${s.d}h away · ${left}/${s.rooms} rooms left</small><div class="danger">${"▲".repeat(s.dng)}${"△".repeat(4-s.dng)} DANGER</div></div>${btn("go","Go",s.id,"",S.stam<s.d*4+8)}</div>`}
+  return h;
+}
+function packView(){
+  const keys=Object.keys(S.inv);
+  let h=`<div class="row"><div class="t"><b>Weapon: ${S.weapon?ITEMS[S.weapon].n:"Bare hands"}</b><small>${wdmg()} damage per hit · ${S.kills} kills</small></div></div>`;
+  if(!keys.length)return h+`<p class="muted">Your pack is empty. Head out and search.</p>`;
+  const groups=[["food","Food"],["drink","Drinks"],["med","Medical"],["wpn","Weapons"],["mat","Materials"]];
+  for(const [k,label] of groups){const ks=keys.filter(x=>ITEMS[x].kind===k);if(!ks.length)continue;
+    h+=`<div class="sec">${label}</div>`;
+    if(k==="mat"){h+=`<div class="chips">${ks.map(x=>`<span class="chip">${ITEMS[x].n} ×${S.inv[x]}</span>`).join("")}</div>`;continue}
+    for(const x of ks){const it=ITEMS[x];const eff=it.use?Object.entries(it.use).map(([a,v])=>`${v>0?"+":""}${v} ${a==="hp"?"health":a==="stam"?"stamina":a}`).join(", "):`${it.dmg} damage`;
+      h+=`<div class="row"><div class="t"><b>${it.n} ×${S.inv[x]}</b><small>${eff}${it.note?` · ${it.note}`:""}</small></div>${btn("use",k==="wpn"?(S.weapon===x?"Unequip":"Equip"):"Use",x,k==="wpn"?"ghost":"")}</div>`}
+  }
+  return h;
+}
+function renderModal(){
+  const m=modalState,el=$("modal"),c=$("card");
+  if(!m){el.hidden=true;return}
+  el.hidden=false;c.className="card"+(m.type==="fight"?" fight":"");
+  if(m.type==="intro"){
+    c.innerHTML=`<h2>Lantern Street</h2><p>The city went dark. You hold one ground-floor flat with a bedroll and a workbench.</p><p class="muted">Scavenge by day, build up the shelter, keep fed and watered, and survive the raids. They strike without warning, mostly at night, and range from a few scouts to a full horde.</p>${btn("close","Start day one")}`;
+  }else if(m.type==="site"){
+    const s=SITES.find(x=>x.id===S.at),left=S.sites[s.id];
+    c.innerHTML=`<div class="art">${siteSVG(s.id)}</div><h2>${s.n}</h2><p class="muted">${left} unsearched rooms. Each search takes 1 hour and 8 stamina. Getting home takes ${s.d}h.</p>${m.msg?`<p>${m.msg}</p>`:""}<div class="stats">${miniStats()}</div><div class="btns" style="justify-content:flex-start">${btn("search","Search a room","","",left<=0||S.stam<8)}${btn("leave","Head home","","ghost")}</div>`;
+  }else if(m.type==="fight"){
+    const f=m.foe;
+    c.innerHTML=`<div class="art">${foeSVG(f.n)}</div><h2>${f.n}</h2><div class="foe"><div class="stat"><div class="lab">Enemy<em>${Math.max(0,f.hp)}/${f.max}</em></div><div class="bar"><i style="width:${Math.max(0,f.hp)/f.max*100}%"></i></div></div></div><p ${m.flash?'class="flash"':""}>${m.msg}</p><div class="stats">${miniStats()}</div><div class="btns" style="justify-content:flex-start">${btn("hit",`Attack (${S.weapon?ITEMS[S.weapon].n.toLowerCase():"fists"})`,"","red")}${btn("flee","Run","","ghost")}</div>`;
+    m.flash=false;
+  }else if(m.type==="dead"){
+    c.innerHTML=`<h2>Lights out</h2><p>${m.why}</p><p class="muted">You lasted ${S.day} day${S.day>1?"s":""} and put down ${S.kills} threat${S.kills===1?"":"s"}. Best run: day ${m.best}.</p>${btn("restart","Start again")}`;
+  }
+}
+function miniStats(){return [["Health",S.hp,"var(--blood)"],["Stamina",S.stam,"var(--moss)"]].map(([n,v,c])=>`<div class="stat ${v<25?"low":""}"><div class="lab">${n}<em>${Math.round(v)}</em></div><div class="bar"><i style="width:${v}%;background:${c}"></i></div></div>`).join("")}
+
+document.addEventListener("click",e=>{
+  const t=e.target.closest("[data-tab],[data-act]");if(!t||t.disabled||t.dataset.dis)return;
+  if(t.dataset.tab)A.tab(t.dataset.tab);else A[t.dataset.act](t.dataset.arg);
+  render();
+});
+function start(d){
+  S=(d&&d.S)||load();
+  if(!S){A.restart()}else if(S.at&&!modalState){modalState={type:"site"}}
+  if(d&&d.modal)modalState=d.modal;
+  render();
+}
+window.claude?.hot?.snapshot?.(()=>({S,modal:modalState}));
+window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
+</script>
+
+</body></html>
