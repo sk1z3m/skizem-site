@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset=utf8><meta name="robots" content="noindex"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Contrail Jet Age</title>
+<title>Untitled Airline Game</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -412,8 +412,8 @@ const code=c=>`<span class="code">${c}</span>`;
 const pairHTML=(a,b)=>`<span class="pair">${code(a)}<i>⇄</i>${code(b)}</span>`;
 const dotOf=i=>`<span class="dot" style="background:${COLORS[i]}"></span>`;
 
-function save(){try{localStorage.setItem('contrail-save-v2',JSON.stringify(G));}catch(e){}}
-function loadSave(){try{const s=localStorage.getItem('contrail-save-v2');return s?JSON.parse(s):null;}catch(e){return null;}}
+function save(){try{localStorage.setItem('airline-save-v2',JSON.stringify(G));}catch(e){}}
+function loadSave(){try{const s=localStorage.getItem('airline-save-v2');return s?JSON.parse(s):null;}catch(e){return null;}}
 
 function render(){
   const mb=$('.mapbox');if(mb)UI.mapScroll=mb.scrollLeft;
@@ -435,10 +435,10 @@ function renderHeader(){
 
 /* setup */
 function setupHTML(){
-  return `<section class="hero"><span class="lbl">Airline management · 2000 to 2020</span><h1>Contrail<br><em>Jet Age</em></h1>
+  return `<section class="hero"><span class="lbl">Airline management · 2000 to 2020</span><h1>Untitled<br><em>Airline Game</em></h1>
   <p>Build an airline across North America. Buy airport slots, open routes, choose aircraft and set fares while three rival airlines fight for the same passengers. You start with offices in your headquarters plus five random cities: two short-haul, one medium and two long-haul. The airline with the highest company value at the end of 2020 wins.</p></section>
   <div class="panel" style="display:flex;flex-direction:column;gap:14px">
-  <div class="field"><label class="lbl" for="alname">Airline name</label><input id="alname" type="text" maxlength="28" value="Contrail Air"></div>
+  <div class="field"><label class="lbl" for="alname">Airline name</label><input id="alname" type="text" maxlength="28" value="My Airline"></div>
   <div class="field"><span class="lbl">Headquarters</span><div class="hqgrid">${HQ_CHOICES.map(([c,s])=>`<button class="hq" data-act="pickhq" data-k="${c}" aria-pressed="${UI.setupHQ===c}"><span>${code(c)} <b>${CI[c].name}</b></span><small>${s}</small></button>`).join('')}</div></div>
   <div class="actions"><button class="btn primary" data-act="start">Start in ${qLabel(0).replace(' · ',' ')}</button>${loadSave()?'<button class="btn" data-act="resume">Continue saved game</button>':''}</div></div>`;
 }
@@ -666,7 +666,7 @@ function handle(act,el){
   const me=G&&P0(),k=el.dataset.k;
   switch(act){
     case 'pickhq':UI.setupHQ=k;render();break;
-    case 'start':{const n=($('#alname').value||'').trim()||'Contrail Air';newGame(n,UI.setupHQ);UI.tab='map';UI.mapScroll=null;save();render();welcomeSheet();break;}
+    case 'start':{const n=($('#alname').value||'').trim()||'My Airline';newGame(n,UI.setupHQ);UI.tab='map';UI.mapScroll=null;save();render();welcomeSheet();break;}
     case 'resume':G=migrate(loadSave());UI.mapScroll=null;render();break;
     case 'tab':UI.tab=k;UI.confirmNew=false;render();window.scrollTo(0,0);break;
     case 'zoom':UI.zoom=!UI.zoom;UI.mapScroll=null;render();break;
@@ -692,7 +692,7 @@ function handle(act,el){
     case 'repay':{const x=Math.min(25,me.debt);if(x>0&&me.cash>=x){me.debt-=x;me.cash-=x;save();render();}break;}
     case 'newgame1':UI.confirmNew=true;render();break;
     case 'newgame0':UI.confirmNew=false;render();break;
-    case 'newgame2':G=null;UI.confirmNew=false;try{localStorage.removeItem('contrail-save-v2');}catch(e){}$('#sheetRoot').innerHTML='';SHEET=null;render();window.scrollTo(0,0);break;
+    case 'newgame2':G=null;UI.confirmNew=false;try{localStorage.removeItem('airline-save-v2');}catch(e){}$('#sheetRoot').innerHTML='';SHEET=null;render();window.scrollTo(0,0);break;
   }
 }
 function start(data){

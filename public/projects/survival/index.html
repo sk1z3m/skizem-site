@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset=utf8><meta name="robots" content="noindex"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Lantern Street</title>
+<title>Untitled Survival Game</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
@@ -74,7 +74,7 @@ button:focus-visible{outline:2px solid var(--sky);outline-offset:2px}
 
 <div class="wrap">
   <header>
-    <h1>Lantern <span>Street</span></h1>
+    <h1>Untitled <span>Survival</span></h1>
     <div class="clock" id="clock"></div>
   </header>
   <div class="stats" id="stats"></div>
@@ -141,9 +141,9 @@ function fresh(){
   const sites={};SITES.forEach(s=>sites[s.id]=s.rooms);
   return {day:1,hour:8,hp:100,food:75,water:70,stam:90,inv:{can:2,water:2,wood:2,cloth:1},home:{stove:0,fence:0,barrel:0,garden:0},weapon:null,at:null,sites,lastRaid:0,log:[],dead:false,kills:0};
 }
-function save(){try{localStorage.setItem("lantern-save",JSON.stringify(S))}catch(e){}}
-function load(){try{const s=JSON.parse(localStorage.getItem("lantern-save"));if(s&&!s.dead)return s}catch(e){}return null}
-function best(v){try{if(v!=null){const b=+localStorage.getItem("lantern-best")||0;if(v>b)localStorage.setItem("lantern-best",v)}return +localStorage.getItem("lantern-best")||0}catch(e){return 0}}
+function save(){try{localStorage.setItem("survival-save",JSON.stringify(S))}catch(e){}}
+function load(){try{const s=JSON.parse(localStorage.getItem("survival-save"));if(s&&!s.dead)return s}catch(e){}return null}
+function best(v){try{if(v!=null){const b=+localStorage.getItem("survival-best")||0;if(v>b)localStorage.setItem("survival-best",v)}return +localStorage.getItem("survival-best")||0}catch(e){return 0}}
 
 function log(t){S.log.unshift({d:S.day,h:S.hour,t});S.log=S.log.slice(0,40)}
 function has(need){return Object.entries(need).every(([k,v])=>(S.inv[k]||0)>=v)}
@@ -203,7 +203,7 @@ function stealSome(n){
   for(let i=0;i<n&&keys.length;i++){const k=keys.splice(R(0,keys.length-1),1)[0];const q=Math.max(1,Math.ceil(S.inv[k]/2));S.inv[k]-=q;if(S.inv[k]<=0)delete S.inv[k];out.push(`${q} ${ITEMS[k].n.toLowerCase()}`)}
   return out.join(", ");
 }
-function die(why){S.dead=true;const b=best(S.day);modalState={type:"dead",why,best:b};try{localStorage.removeItem("lantern-save")}catch(e){}}
+function die(why){S.dead=true;const b=best(S.day);modalState={type:"dead",why,best:b};try{localStorage.removeItem("survival-save")}catch(e){}}
 
 /* ---------- actions ---------- */
 const A={
@@ -397,7 +397,7 @@ function renderModal(){
   if(!m){el.hidden=true;return}
   el.hidden=false;c.className="card"+(m.type==="fight"?" fight":"");
   if(m.type==="intro"){
-    c.innerHTML=`<h2>Lantern Street</h2><p>The city went dark. You hold one ground-floor flat with a bedroll and a workbench.</p><p class="muted">Scavenge by day, build up the shelter, keep fed and watered, and survive the raids. They strike without warning, mostly at night, and range from a few scouts to a full horde.</p>${btn("close","Start day one")}`;
+    c.innerHTML=`<h2>Untitled Survival Game</h2><p>The city went dark. You hold one ground-floor flat with a bedroll and a workbench.</p><p class="muted">Scavenge by day, build up the shelter, keep fed and watered, and survive the raids. They strike without warning, mostly at night, and range from a few scouts to a full horde.</p>${btn("close","Start day one")}`;
   }else if(m.type==="site"){
     const s=SITES.find(x=>x.id===S.at),left=S.sites[s.id];
     c.innerHTML=`<div class="art">${siteSVG(s.id)}</div><h2>${s.n}</h2><p class="muted">${left} unsearched rooms. Each search takes 1 hour and 8 stamina. Getting home takes ${s.d}h.</p>${m.msg?`<p>${m.msg}</p>`:""}<div class="stats">${miniStats()}</div><div class="btns" style="justify-content:flex-start">${btn("search","Search a room","","",left<=0||S.stam<8)}${btn("leave","Head home","","ghost")}</div>`;
