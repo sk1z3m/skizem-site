@@ -582,8 +582,8 @@ const code=c=>`<span class="code">${c}</span>`;
 const pairHTML=(a,b)=>`<span class="pair">${code(a)}<i>⇄</i>${code(b)}</span>`;
 const dotOf=i=>`<span class="dot" style="background:${COLORS[i]}"></span>`;
 
-function save(){try{localStorage.setItem('contrail-save-v2',JSON.stringify(G));}catch(e){}}
-function loadSave(){try{const s=localStorage.getItem('contrail-save-v2');return s?JSON.parse(s):null;}catch(e){return null;}}
+function save(){try{localStorage.setItem('airline-save-v2',JSON.stringify(G));}catch(e){}}
+function loadSave(){try{const s=localStorage.getItem('airline-save-v2');return s?JSON.parse(s):null;}catch(e){return null;}}
 
 function render(){
   applyTheme(G?G.color:UI.setupColor);
@@ -927,7 +927,7 @@ function handle(act,el){
     case 'repay':{const x=Math.min(25,me.debt);if(x>0&&me.cash>=x){me.debt-=x;me.cash-=x;save();render();}break;}
     case 'newgame1':UI.confirmNew=true;render();break;
     case 'newgame0':UI.confirmNew=false;render();break;
-    case 'newgame2':G=null;UI.confirmNew=false;try{localStorage.removeItem('contrail-save-v2');}catch(e){}$('#sheetRoot').innerHTML='';SHEET=null;render();window.scrollTo(0,0);break;
+    case 'newgame2':G=null;UI.confirmNew=false;try{localStorage.removeItem('airline-save-v2');}catch(e){}$('#sheetRoot').innerHTML='';SHEET=null;render();window.scrollTo(0,0);break;
   }
 }
 function start(data){
