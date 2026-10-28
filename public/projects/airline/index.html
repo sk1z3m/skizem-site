@@ -36,7 +36,11 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background
 .bar{display:flex;align-items:center;gap:12px;padding-block:10px 4px}
 .brand{font-family:var(--display);font-weight:700;font-size:23px;letter-spacing:.03em;text-transform:uppercase;line-height:1.05;min-width:0}
 .brand small{display:block;font-family:var(--body);font-size:12.5px;letter-spacing:0;text-transform:none;font-weight:500;color:var(--muted);margin-top:2px}
-.bar .btn{margin-left:auto;flex-shrink:0}
+.bar .bact{margin-left:auto;display:flex;gap:8px;flex-shrink:0}
+.bact .btn{display:inline-flex;align-items:center;gap:6px}
+@media (max-width:440px){.mlbl{display:none}}
+.mrow .end{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.impact{font-family:var(--mono);font-size:13px;white-space:nowrap}
 .stats{display:flex;gap:18px;flex-wrap:wrap;padding-block:4px 6px}
 .stat{display:flex;flex-direction:column;min-width:0}
 .stat b{font-family:var(--mono);font-weight:500;font-size:14.5px;font-variant-numeric:tabular-nums}
@@ -128,6 +132,11 @@ details summary{cursor:pointer;font-size:13.5px;color:var(--muted);padding-block
 .nico svg{display:block}
 .news li{align-items:start}
 .alname{display:inline-flex;align-items:center;gap:6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:999px;padding:7px 12px;font:500 13.5px var(--body);cursor:pointer;min-height:36px}
+.chip .num{color:var(--muted);font-size:12px}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chip[aria-pressed="true"] .num{color:var(--accent-ink)}
 /* sheet */
 .scrim{position:fixed;inset:0;background:rgb(8 16 26 / .42);z-index:20}
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;background:var(--card);border-top:1px solid var(--rule);border-radius:16px 16px 0 0;max-height:86vh;overflow-y:auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px calc(20px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 30px rgb(0 0 0 / .2);display:flex;flex-direction:column;gap:14px}
@@ -243,7 +252,7 @@ function applyTheme(pk){if(typeof document==='undefined')return;const p=PCOL[pk]
   const css=`:root{${Lv}}@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){${Dv}}}:root[data-theme="dark"]{${Dv}}`;if(st.textContent!==css)st.textContent=css;}
 const swatches=cur=>`<div class="swatches" role="group" aria-label="Airline colour">${PALETTE.map(x=>`<button class="sw" data-act="color" data-k="${x.k}" aria-pressed="${cur===x.k}" aria-label="${x.name}" title="${x.name}" style="--sw:${x.l};--swd:${x.d}"></button>`).join('')}</div>`;
 const finSVG=(col,size=28)=>`<svg width="${size}" height="${size}" viewBox="0 0 32 32" aria-hidden="true" style="flex-shrink:0"><path d="M3 30 L7 3 Q7.4 1.5 9 1.5 L15 1.5 Q16.4 1.6 17.2 2.8 L30 30 Z" fill="${col}"/><circle cx="13" cy="17" r="3.8" fill="var(--card)"/><path d="M5.5 25 L27.6 25" stroke="var(--card)" stroke-width="1.6"/></svg>`;
-const ICO={drop:'<path d="M8 2C8 2 3.5 7 3.5 10a4.5 4.5 0 0 0 9 0C12.5 7 8 2 8 2Z"/>',cloud:'<path d="M4.5 12.5h7a3 3 0 0 0 .3-6 4 4 0 0 0-7.6 1.2 2.4 2.4 0 0 0 .3 4.8Z"/>',
+const ICO={meet:'<circle cx="5.4" cy="5.6" r="2.2"/><circle cx="11" cy="5.6" r="2.2"/><path d="M1.6 13c.4-2.2 1.8-3.4 3.8-3.4s3.4 1.2 3.8 3.4M8.8 9.9c.6-.3 1.3-.5 2.2-.5 2 0 3.4 1.2 3.8 3.4"/>',route:'<circle cx="3.5" cy="12" r="1.6"/><circle cx="12.5" cy="4" r="1.6"/><path d="M4.8 10.8C7 6 9 9 11.2 5.2" stroke-dasharray="1.6 1.6"/>',tune:'<path d="M2.5 4.5h7M12.5 4.5h1M2.5 11.5h1M6.5 11.5h7"/><circle cx="11" cy="4.5" r="1.6"/><circle cx="5" cy="11.5" r="1.6"/>',drop:'<path d="M8 2C8 2 3.5 7 3.5 10a4.5 4.5 0 0 0 9 0C12.5 7 8 2 8 2Z"/>',cloud:'<path d="M4.5 12.5h7a3 3 0 0 0 .3-6 4 4 0 0 0-7.6 1.2 2.4 2.4 0 0 0 .3 4.8Z"/>',
  medal:'<circle cx="8" cy="10" r="3.6"/><path d="M5.4 2 8 6.4 10.6 2"/>',virus:'<circle cx="8" cy="8" r="3.4"/><path d="M8 1.6v2.2M8 12.2v2.2M1.6 8h2.2M12.2 8h2.2M3.5 3.5l1.5 1.5M11 11l1.5 1.5M3.5 12.5 5 11M11 5l1.5-1.5"/>',
  down:'<path d="M2 4.5 6.5 9 9 6.5 14 11.5M14 8v3.5h-3.5"/>',up:'<path d="M2 11.5 6.5 7 9 9.5 14 4.5M14 8V4.5h-3.5"/>',alert:'<path d="M8 2.2 14.4 13.5H1.6Z"/><path d="M8 6.6v3.3M8 11.6v.1"/>',
  coin:'<circle cx="8" cy="8" r="5.6"/><path d="M9.8 5.8H7.2a1.2 1.2 0 0 0 0 2.4h1.6a1.2 1.2 0 0 1 0 2.4H6.2M8 4.6v1.2M8 10.6v1.2"/>',flag:'<path d="M3.5 14.5V2.5M3.5 3h8.5l-2 2.8 2 2.8H3.5"/>',
@@ -365,7 +374,7 @@ function estimate(al,inp,plan){const ents=entriesFor(inp.a,inp.b,inp.routeId).ma
 /* ---------- network simulation with connections ---------- */
 function simulateAll(t,extra){
   const rep=extra&&extra.replace,stats=new Map(),markets={},rlist=new Map();
-  for(const al of G.airlines){if(al.out)continue;const rs=al.routes.filter(r=>r.id!==rep);if(extra&&extra.al===al)rs.push(extra.r);rlist.set(al,rs);
+  for(const al of G.airlines){if(al.out)continue;const rs=al.routes.filter(r=>r.id!==rep);if(extra&&extra.al===al&&extra.r)rs.push(extra.r);rlist.set(al,rs);
     for(const r of rs){const k=pairKey(r.a,r.b);(markets[k]||(markets[k]=[])).push({al,r});}}
   for(const k in markets){const list=markets[k],[a,b]=k.split('-'),res=simMarket(a,b,t,list.map(x=>({al:x.al,plane:x.r.plane,freq:x.r.freq,fp:x.r.fp})));
     list.forEach((x,j)=>{const e=econ(PI[x.r.plane],x.r.freq,x.r.planes,res[j],t,x.r.rate??planeRate(x.al,x.r.plane));stats.set(x.r,{...e,local:e.pax,conn:0,connRev:0,top:[]});});}
@@ -599,7 +608,7 @@ function renderHeader(){
   const me=P0(),h=$('#hdr');h.hidden=false;
   const T=[['map','Map'],['routes','Routes'],['slots','Slots'],['fleet','Fleet'],['money','Money'],['rivals','Rivals']];
   h.innerHTML=`<div class="wrap"><div class="bar">${finSVG('var(--accent)',36)}<div class="brand">${esc(me.name)}<small>${G.over?'Final standings':qLabel(G.t)} · HQ ${CI[me.hq].name}</small></div>
-  <button class="btn primary" data-act="end" ${G.over?'disabled':''}>End quarter</button></div>
+  <div class="bact"><button class="btn" data-act="meeting" aria-label="Strategy meeting" title="Strategy meeting" ${G.over?'disabled':''}>${icon('meet')}<span class="mlbl">Meeting</span></button><button class="btn primary" data-act="end" ${G.over?'disabled':''}>End quarter</button></div></div>
   <div class="stats"><div class="stat"><span>Cash</span><b>${money(me.cash)}</b></div><div class="stat"><span>Debt</span><b>${money(me.debt)}</b></div><div class="stat"><span>Company value</span><b>${money(value(me))}</b></div><div class="stat"><span>Rank</span><b>${rankOf(me)} of 4</b></div><div class="stat"><span>Negotiators free</span><b>${freeNegs(me)} of ${me.negs}</b></div></div>
   <nav class="tabs" role="tablist">${T.map(([k,l])=>`<button role="tab" aria-selected="${UI.tab===k}" data-act="tab" data-k="${k}">${l}</button>`).join('')}</nav></div>`;
 }
@@ -655,18 +664,23 @@ function tabMap(){
 
 /* routes tab */
 function tabRoutes(){
-  const me=P0(),rs=[...me.routes].sort((a,b)=>(b.stats?b.stats.profit:0)-(a.stats?a.stats.profit:0));
+  const me=P0(),allR=[...me.routes].sort((a,b)=>(b.stats?b.stats.profit:0)-(a.stats?a.stats.profit:0));
+  const touch=(r,c)=>r.a===c||r.b===c,hubList=gates(me).filter(c=>allR.some(r=>touch(r,c))),other=allR.filter(r=>!gates(me).some(c=>touch(r,c)));
+  let hub=UI.routeHub;if(hub&&hub!=='other'&&!hubList.includes(hub))hub=null;if(hub==='other'&&!other.length)hub=null;
+  const rs=hub==='other'?other:hub?allR.filter(r=>touch(r,hub)):allR;
+  const chip=(k,label,n)=>`<button class="chip" data-act="rhub" data-k="${k}" aria-pressed="${(hub||'')===k}">${label} <span class="num">${n}</span></button>`;
+  const chips=hubList.length+(other.length?1:0)>1?`<div class="field"><span class="lbl">Show routes from</span><div class="chips">${chip('','All',allR.length)}${hubList.map(c=>chip(c,`${c===me.hq?'HQ · ':''}${CI[c].name}`,allR.filter(r=>touch(r,c)).length)).join('')}${other.length?chip('other','Other',other.length):''}</div></div>`:'';
   const tot=rs.reduce((s,r)=>s+(r.stats?r.stats.profit:0),0),flights=rs.reduce((s,r)=>s+r.freq,0);
   const head=`<div class="maptools"><h2>Routes</h2><button class="btn primary sm" data-act="newroute">+ New route</button></div><p class="muted" style="font-size:13.5px">Every route must touch your HQ${me.hubs.length?` or a hub (${me.hubs.map(c=>CI[c].name).join(', ')})`:''}. ${hubMsg(me)} As ${an(NATION[me.home][1])} airline you can fly within ${NATION[me.home][0]} and abroad, but not domestic routes inside another country. Passengers can change planes at your HQ and hubs, filling seats on both flights.</p>`;
   if(!rs.length)return head+`<div class="empty"><b>No routes yet.</b><p class="muted">Start with a busy city near your headquarters. A route needs aircraft, a weekly schedule and a fare. Missing planes are bought for you. Your starting cities already have slots.</p><button class="btn primary" data-act="newroute">Open your first route</button></div>`;
-  return head+`<div class="grid2"><div class="kv"><span class="lbl">Routes</span><b>${rs.length}</b></div><div class="kv"><span class="lbl">Weekly round trips</span><b>${flights}</b></div><div class="kv"><span class="lbl">Connecting pax / week</span><b>${me.flows?me.flows.total:'—'}</b></div><div class="kv"><span class="lbl">Route profit last quarter</span><b class="${cls(tot)}">${me.last?sgn(tot):'—'}</b></div></div>
-  ${connPanel(me)}<div class="list">${rs.map(r=>{const P=PI[r.plane],s=r.stats;return `<button class="row" data-act="editroute" data-k="${r.id}">${pairHTML(r.a,r.b)}<div class="mid"><div>${P.name} × ${r.planes}</div><div class="sub">${grounded(P,G.t)?'<b class="neg">Grounded</b> · ':''}${r.freq}/week · fare ${r.fp}% ($${Math.round(refFare(km(r.a,r.b))*r.fp/100)}) · ${fmtKm(km(r.a,r.b))}${s&&s.conn?` · ${s.local} local + ${s.conn} connecting`:''}</div></div><div class="end">${s?`<div class="num ${cls(s.profit)}">${sgn(s.profit)}</div><div class="sub"><span class="lfbar"><i style="width:${Math.round(s.lf*100)}%"></i></span> ${Math.round(s.lf*100)}%</div>`:'<span class="sub">New</span>'}</div></button>`;}).join('')}</div>`;
+  return head+chips+`<div class="grid2"><div class="kv"><span class="lbl">Routes</span><b>${rs.length}</b></div><div class="kv"><span class="lbl">Weekly round trips</span><b>${flights}</b></div><div class="kv"><span class="lbl">Connecting pax / week</span><b>${me.flows?(hub&&hub!=='other'?(me.flows.byHub[hub]||0):hub==='other'?0:me.flows.total):'—'}</b></div><div class="kv"><span class="lbl">Route profit last quarter</span><b class="${cls(tot)}">${me.last?sgn(tot):'—'}</b></div></div>
+  ${connPanel(me,hub==='other'?null:hub)}<div class="list">${rs.map(r=>{const P=PI[r.plane],s=r.stats;return `<button class="row" data-act="editroute" data-k="${r.id}">${pairHTML(r.a,r.b)}<div class="mid"><div>${P.name} × ${r.planes}</div><div class="sub">${grounded(P,G.t)?'<b class="neg">Grounded</b> · ':''}${r.freq}/week · fare ${r.fp}% ($${Math.round(refFare(km(r.a,r.b))*r.fp/100)}) · ${fmtKm(km(r.a,r.b))}${s&&s.conn?` · ${s.local} local + ${s.conn} connecting`:''}</div></div><div class="end">${s?`<div class="num ${cls(s.profit)}">${sgn(s.profit)}</div><div class="sub"><span class="lfbar"><i style="width:${Math.round(s.lf*100)}%"></i></span> ${Math.round(s.lf*100)}%</div>`:'<span class="sub">New</span>'}</div></button>`;}).join('')}</div>`;
 }
 
-function connPanel(me){
+function connPanel(me,hub){
   if(!me.flows||!me.flows.top.length)return `<p class="muted" style="font-size:13.5px">No connecting passengers yet. When two of your routes meet at your HQ or a hub, travellers between their far ends can connect, as long as the detour isn't too long and you don't already fly them direct.</p>`;
-  const hubs=Object.entries(me.flows.byHub).sort((a,b)=>b[1]-a[1]);
-  return `<div class="panel cpanel"><h3>Connecting traffic</h3><p class="muted" style="font-size:13px">${hubs.map(([h,n])=>`${CI[h].name} ${n}/week`).join(' · ')}</p><div class="list">${me.flows.top.map(f=>`<div class="row" style="cursor:default;grid-template-columns:1fr auto">${flowHTML(f)}<span class="num">${f.n}/week</span></div>`).join('')}</div></div>`;
+  const hubs=Object.entries(me.flows.byHub).filter(([h])=>!hub||h===hub).sort((a,b)=>b[1]-a[1]),top=me.flows.top.filter(f=>!hub||f.h===hub);if(hub&&!top.length)return `<p class="muted" style="font-size:13.5px">No connecting passengers through ${CI[hub].name} last quarter.</p>`;
+  return `<div class="panel cpanel"><h3>Connecting traffic</h3><p class="muted" style="font-size:13px">${hubs.map(([h,n])=>`${CI[h].name} ${n}/week`).join(' · ')}</p><div class="list">${top.map(f=>`<div class="row" style="cursor:default;grid-template-columns:1fr auto">${flowHTML(f)}<span class="num">${f.n}/week</span></div>`).join('')}</div></div>`;
 }
 
 function negResultsHTML(){const r=G.negResults||[];if(!r.length)return '';
@@ -681,6 +695,85 @@ function tabSlots(){
   ${gates(me).length?`<h3>Terminals</h3><div class="list">${gates(me).map(c=>{const T=me.terms[c]||{stage:0},l=stagesFor(c);return `<button class="row" data-act="city" data-k="${c}">${code(c)}<div class="mid"><div>${CI[c].name}</div><div class="sub">${T.stage?l.slice(0,T.stage).map(x=>x.name).join(' · '):'No expansions yet'}${T.build?` · building ${l[T.stage].name.toLowerCase()}, ready ${qLabel(T.build.done)}`:''}</div></div><div class="end num">${T.stage} of ${l.length}</div></button>`;}).join('')}</div>`:''}
   <h3>Your slots</h3><div class="tscroll"><table><thead><tr><th>City</th><th class="r">Held</th><th class="r">Used</th><th class="r">Free</th><th class="r">Relationship</th><th></th></tr></thead><tbody>${held.map(c=>{const n=me.slots[c.id],u=usedSlots(me,c.id),rel=Math.round(me.rel[c.id]||10);return `<tr><td>${code(c.id)} ${c.name}${c.id===me.hq?' · HQ':me.hubs.includes(c.id)?' · Hub':''}</td><td class="r num">${n}</td><td class="r num">${u}</td><td class="r num">${n-u}</td><td class="r"><span class="lfbar"><i style="width:${rel}%"></i></span> <span class="num">${rel}</span></td><td class="r">${n-u>0&&!(isGate(me,c.id)&&n<=1)?`<button class="btn sm" data-act="retslot" data-k="${c.id}">Return 1 · ${money(slotPrice(c.id)*0.5)}</button>`:''}</td></tr>`;}).join('')}</tbody></table></div>
   <p class="muted" style="font-size:13px">Relationships grow while you serve a city and fade when you don't. A better relationship, or a hub, lets you win slots with lower offers. Every slot you hold costs a small fee each quarter.</p>`;
+}
+
+/* ---------- strategy meeting ---------- */
+let MTG=null;
+function deltaFor(al,inp,S0){const plan=planRoute(al,inp);if(plan.err&&!plan.slotErr)return null;
+  const hr={id:'__m',a:inp.a,b:inp.b,plane:inp.plane,planes:plan.need,freq:inp.freq,fp:inp.fp,rate:plan.need?(plan.useIdle*planeRate(al,inp.plane)+plan.buyPlanes*(plan.lease?LEASE:UPK))/plan.need:UPK};
+  const S1=simulateAll(G.t,{al,r:hr,replace:inp.routeId});return{delta:S1.own.get(al)-S0.own.get(al),plan,e:S1.stats.get(hr)};}
+const fareOf=(a,b,fp)=>Math.round(refFare(km(a,b))*fp/100);
+function buildMeeting(){
+  const me=P0(),S0=simulateAll(G.t),M={ideas:[],tweaks:[],money:[],plan:[]};
+  const avail=PLANES.filter(P=>(available(P,G.t)||idle(me,P.id)>0)&&!grounded(P,G.t));
+  // new routes
+  const cands=[];
+  for(const o of gates(me))for(const c of CITIES){if(c.id===o||routeRule(me,o,c.id)||me.routes.some(r=>pairKey(r.a,r.b)===pairKey(o,c.id)))continue;
+    const d=km(o,c.id),D=baseDemand(o,c.id,G.t)/(entriesFor(o,c.id,null).length+1);if(D<60)continue;let best=null;
+    for(const P of avail){if(P.range<d)continue;const inp={routeId:null,a:o,b:c.id,plane:P.id,freq:clamp(Math.round(D/(P.seats*0.85)),1,21),fp:100,acq:'buy'};
+      let plan=planRoute(me,inp,{ignoreSlots:true});if(plan.err)continue;if(plan.cost>me.cash*0.6){inp.acq='lease';plan=planRoute(me,inp,{ignoreSlots:true});if(plan.err)continue;}
+      const e=estimate(me,inp,plan),sc=e.profit-(inp.acq==='lease'?0:plan.cost*0.04);if(!best||sc>best.sc)best={sc,inp};}
+    if(best)cands.push(best);}
+  cands.sort((p,q)=>q.sc-p.sc);
+  for(const cd of cands.slice(0,10)){const r=deltaFor(me,cd.inp,S0);if(!r){cd.score=-1;continue;}Object.assign(cd,{delta:r.delta,plan:r.plan,e:r.e,score:r.delta-(cd.inp.acq==='lease'?0:r.plan.cost*0.04)});}
+  M.ideas=cands.slice(0,10).filter(c=>c.score>0.2).sort((p,q)=>q.score-p.score).slice(0,4);
+  // tweaks to existing routes
+  for(const r of me.routes){if(!r.stats)continue;const P=PI[r.plane],d=km(r.a,r.b),base={routeId:r.id,a:r.a,b:r.b,plane:r.plane,freq:r.freq,fp:r.fp,acq:'buy'},opts=[];
+    if(r.fp<=150)opts.push({...base,fp:r.fp+10,kind:'fareUp'});if(r.fp>=70)opts.push({...base,fp:r.fp-10,kind:'fareDown'});
+    opts.push({...base,freq:r.freq+2,kind:'more'});if(r.freq>2)opts.push({...base,freq:r.freq-2,kind:'fewer'});
+    const alts=avail.filter(Q=>Q.id!==r.plane&&Q.range>=d);
+    const up=alts.filter(Q=>Q.seats>P.seats).sort((x,y)=>x.seats-y.seats)[0],dn=alts.filter(Q=>Q.seats<P.seats).sort((x,y)=>y.seats-x.seats)[0];
+    for(const Q of [up,dn])if(Q){const o={...base,plane:Q.id,kind:'swap'};let pl=planRoute(me,o);if(!pl.err&&pl.cost>me.cash*0.5)o.acq='lease';opts.push(o);}
+    let best=null;
+    for(const o of opts){const res=deltaFor(me,o,S0);if(!res||res.plan.err)continue;const sc=res.delta-(o.acq==='lease'?0:res.plan.cost*0.04);if(!best||sc>best.sc)best={sc,o,res};}
+    const dc=simulateAll(G.t,{al:me,r:null,replace:r.id}).own.get(me)-S0.own.get(me);
+    if(dc>0.3&&r.loss>=1&&(!best||dc>best.sc))best={sc:dc,o:{...base,kind:'close'},res:{delta:dc,plan:{cost:0,buyPlanes:0}}};
+    if(best&&best.sc>0.25)M.tweaks.push({r,...best});}
+  M.tweaks.sort((p,q)=>q.sc-p.sc);M.tweaks=M.tweaks.slice(0,5);
+  // fleet and finance
+  for(const P of PLANES){const n=idle(me,P.id);if(n<=0)continue;const own=Math.min(n,me.fleet[P.id]||0),ls=n-own,c=own*P.price*UPK+ls*P.price*LEASE;
+    M.money.push({ic:'plane',main:`${n} idle ${P.name}${n>1?'s':''}`,sub:`They cost ${money(c)} a quarter and fly nothing.${ls&&returnFee(me,P.id)>0?` Returning a lease early costs ${money(returnFee(me,P.id))}.`:''}`,act:own?{label:`Sell 1 · ${money(P.price*RESALE)}`,fn:()=>{me.fleet[P.id]--;me.cash+=P.price*RESALE;return 1;}}:{label:'Return 1 lease',fn:()=>{returnLease(me,P.id);return 1;}}});}
+  const L=me.last;
+  if(L&&L.net<0&&me.cash< -L.net*4)M.money.push({ic:'alert',main:'Cash is running low',sub:`At last quarter's loss of ${money(-L.net)}, your cash lasts about ${Math.max(0,Math.floor(me.cash/-L.net))} quarters. Borrow, or close routes that lose money.`,act:me.debt+25<=maxDebt(me)?{label:'Borrow $25M',fn:()=>{me.debt+=25;me.cash+=25;return 1;}}:null});
+  if(me.debt>0&&me.cash>me.debt+150)M.money.push({ic:'coin',main:'Pay down debt',sub:`You have spare cash. Repaying ${money(Math.min(25,me.debt))} saves ${money(Math.min(25,me.debt)*0.015)} interest a quarter.`,act:{label:`Repay ${money(Math.min(25,me.debt))}`,fn:()=>{const x=Math.min(25,me.debt);me.debt-=x;me.cash-=x;return 1;}}});
+  const shared=me.routes.filter(r=>entriesFor(r.a,r.b,r.id).length).length;
+  if(me.ad===0&&shared)M.money.push({ic:'up',main:'Start advertising',sub:`Rivals fly ${shared} of your routes and you have no advertising. Low advertising (${money(AD[1])} a quarter) lifts your reputation, which wins more of those passengers.`,act:{label:'Set ads to Low',fn:()=>{me.ad=1;return 1;}}});
+  // network planning
+  const needs=M.ideas.filter(c=>c.plan&&c.plan.slotErr);
+  if(needs.length&&freeNegs(me)>0){const c=needs[0].plan.slotErr;if(!me.bids.some(b=>b.c===c))M.plan.push({ic:'flag',main:`Send a negotiator to ${CI[c].name}`,sub:`Your best new route idea, ${needs[0].inp.a}–${needs[0].inp.b}, needs slots there. ${freeNegs(me)} negotiator${freeNegs(me)>1?'s are':' is'} free this quarter.`,act:{label:'Negotiate',fn:()=>{citySheet(c);return 0;}}});}
+  if(me.hubs.length<maxHubs(G.t)){const hc=CITIES.filter(c=>ctry(c.id)===me.home&&!isGate(me,c.id)&&(me.slots[c.id]||0)>0).sort((a,b)=>b.size-a.size)[0];
+    if(hc)M.plan.push({ic:'route',main:`Open a hub in ${hc.name}`,sub:`You can run ${maxHubs(G.t)-me.hubs.length} more hub${maxHubs(G.t)-me.hubs.length>1?'s':''}. ${hc.name} is your biggest home-country city that isn't one yet. Routes could start there and passengers could connect.`,act:me.cash>=hubCost(hc.id)?{label:`Make hub · ${money(hubCost(hc.id))}`,fn:()=>{openHub(me,hc.id);addNews(`You open a hub in ${hc.name}.`,'you');return 1;}}:null});}
+  {const g=gates(me).map(c=>({c,n:me.routes.filter(r=>r.a===c||r.b===c).length,T:me.terms[c]})).filter(x=>x.n>=3&&!(x.T&&x.T.build)).sort((a,b)=>b.n-a.n)[0];
+    if(g){const st=stagesFor(g.c)[g.T?g.T.stage:0];if(st&&me.cash>st.cost(g.c)+50)M.plan.push({ic:'build',main:`Build a ${st.name.replace(/^[A-Z](?=[a-z])/,m=>m.toLowerCase())} at ${CI[g.c].name}`,sub:`${g.n} of your routes use ${CI[g.c].name}. ${st.desc}`,act:{label:`Build · ${money(st.cost(g.c))}`,fn:()=>{buildTerminal(me,g.c);addNews(`Construction starts: ${st.name} at ${CI[g.c].name}.`,'you');return 1;}}});}}
+  for(const c in me.slots){const f=freeAt(me,c);if(f>=8&&!isGate(me,c)){M.plan.push({ic:'info',main:`${f} unused slots at ${CI[c].name}`,sub:`They cost ${money(f*0.004*CI[c].size)} a quarter. Fly more there, or return some on the Slots tab.`,act:{label:'Open Slots tab',fn:()=>{UI.tab='slots';closeSheet();return 0;}}});break;}}
+  return M;
+}
+function tweakText(t){const {o,res,r}=t,P=PI[r.plane],pl=res.plan,Q=PI[o.plane];
+  switch(o.kind){case 'fareUp':return `Raise the fare to $${fareOf(r.a,r.b,o.fp)} (${o.fp}% of standard)`;
+    case 'fareDown':return `Cut the fare to $${fareOf(r.a,r.b,o.fp)} (${o.fp}% of standard)`;
+    case 'more':return `Add 2 weekly flights (${o.freq} a week)${pl.buyPlanes?`, ${o.acq==='lease'?'leasing':'buying'} ${pl.buyPlanes} more ${P.name}`:''}`;
+    case 'fewer':return `Cut to ${o.freq} flights a week, then sell any spare planes`;
+    case 'swap':return `Switch to the ${Q.name}${pl.buyPlanes?` (${o.acq==='lease'?'lease':'buy'} ${pl.buyPlanes}, ${money(pl.cost)} up front)`:' (you have spare ones)'}, then sell the old planes`;
+    case 'close':return 'Close the route, then sell or return its planes';}}
+function routeWhy(r){const s=r.stats,bits=[`${Math.round(s.lf*100)}% full`,`${sgn(s.profit)} last quarter`];if(r.loss>=2)bits.push(`lost money ${r.loss} quarters running`);
+  const cheap=entriesFor(r.a,r.b,r.id).filter(x=>x.r.fp<r.fp-5).sort((p,q)=>p.r.fp-q.r.fp)[0];if(cheap)bits.push(`${cheap.al.name} charges $${fareOf(r.a,r.b,cheap.r.fp)} vs your $${fareOf(r.a,r.b,r.fp)}`);return bits.join(' · ');}
+function meetingSheet(keep){
+  const me=P0(),M=MTG=buildMeeting();M.acts=[];
+  const btn=(label,fn,primary)=>{M.acts.push(fn);return `<button class="btn sm${primary?' primary':''}" data-act="mtg" data-k="${M.acts.length-1}">${label}</button>`;};
+  const row=(lead,main,sub,end)=>`<div class="row mrow" style="cursor:default;align-items:start">${lead}<div class="mid"><div>${main}</div><div class="sub">${sub}</div></div><div class="end">${end}</div></div>`;
+  const sec=(ic,role,title,rows,empty)=>`<section class="field"><span class="lbl" style="display:flex;gap:6px;align-items:center">${icon(ic)} ${role}</span><h3>${title}</h3>${rows.length?`<div class="list">${rows.join('')}</div>`:`<p class="muted" style="font-size:13.5px">${empty}</p>`}</section>`;
+  const ideas=M.ideas.map(c=>{const P=PI[c.inp.plane],sl=c.plan.slotErr;
+    const sub=`${P.name} · ${c.inp.freq}/week · ${fmtKm(km(c.inp.a,c.inp.b))} · about ${fmtN(c.e.pax)} passengers each way, ${Math.round(c.e.lf*100)}% full${c.e.conn>=1?`, ${fmtN(c.e.conn)} connecting`:''}. ${sl?`<b>Needs slots at ${CI[sl].name}.</b>`:c.inp.acq==='lease'?'Lease the planes.':''}`;
+    return row(pairHTML(c.inp.a,c.inp.b),`Open ${CI[c.inp.a].name} to ${CI[c.inp.b].name}`,sub,`<span class="impact ${cls(c.delta)}">${sgn(c.delta)}/qtr</span>${btn('Plan it',()=>{RB={routeId:null,...c.inp};renderBuilder();return 0;},!sl)}${sl&&freeNegs(me)>0&&!me.bids.some(b=>b.c===sl)?btn('Negotiate',()=>{citySheet(sl);return 0;}):''}`);});
+  const tweaks=M.tweaks.map(t=>row(pairHTML(t.r.a,t.r.b),tweakText(t),routeWhy(t.r),`<span class="impact ${cls(t.res.delta)}">${sgn(t.res.delta)}/qtr</span>${btn('Do it',()=>{if(t.o.kind==='close'){closeRoute(me,t.r.id);return 1;}const pl=planRoute(me,t.o);if(pl.err)return 1;applyPlan(me,{...t.o},pl);return 1;},1)}`));
+  const misc=l=>l.map(x=>row(`<span class="nico">${icon(x.ic)}</span>`,x.main,x.sub,x.act?btn(x.act.label,x.act.fn):''));
+  const html=sheetHead('Strategy meeting',`${qLabel(G.t)} · forecasts use this quarter's demand and today's competition`)+
+    sec('route','Network planner','New route ideas',ideas,'No strong new routes right now. Win slots in new cities, or open a hub, to widen your options.')+
+    sec('tune','Revenue manager','Tweaks to existing routes',tweaks,me.routes.length?(me.last?'Your routes are already well tuned. Check back next quarter.':'End your first quarter so there are results to review.'):'Open a route first.')+
+    sec('coin','Finance director','Fleet and finance',misc(M.money),'Nothing urgent. No idle planes, and your cash is healthy.')+
+    sec('build','Head of planning','Slots, hubs and terminals',misc(M.plan),'Nothing to act on this quarter.')+
+    `<p class="muted" style="font-size:12.5px">Each figure is the change in your whole network's quarterly profit, connecting passengers included. Plane purchases are weighed as a cost too. Rivals will react, so treat these as estimates.</p><div class="actions"><button class="btn" data-act="close">Close meeting</button></div>`;
+  const st=keep&&$('.sheet')?$('.sheet').scrollTop:0;openSheet(html,{meeting:true});if(keep)$('.sheet').scrollTop=st;
 }
 
 function termPanel(id){const me=P0(),T=me.terms[id]||{stage:0},l=stagesFor(id);
@@ -875,7 +968,7 @@ function reportSheet(){
     <div class="grid2"><div class="kv"><span class="lbl">Revenue</span><b>${money(L.rev)}</b></div><div class="kv"><span class="lbl">Costs</span><b>${money(L.rev-L.net)}</b></div><div class="kv"><span class="lbl">Passengers</span><b>${Math.round(L.pax).toLocaleString('en-US')}</b></div><div class="kv"><span class="lbl">Cash</span><b>${money(me.cash)}</b></div></div>
     ${best?`<p style="font-size:14px">Best route: ${pairHTML(best.a,best.b)} <span class="num ${cls(best.stats.profit)}">${sgn(best.stats.profit)}</span> at ${Math.round(best.stats.lf*100)}% full.</p>`:''}
     ${negResultsHTML()}${G.news.length?`<div class="field"><span class="lbl">Dispatches</span><ul class="news">${G.news.slice(0,8).map(n=>`<li><span class="nico">${newsIcon(n)}</span><span>${esc(n.text)}</span></li>`).join('')}</ul></div>`:''}
-    <div class="actions"><button class="btn primary" data-act="close">Continue</button></div>`;
+    <div class="actions"><button class="btn primary" data-act="close">Continue</button><button class="btn" data-act="meeting">${icon('meet')} Strategy meeting</button></div>`;
   }
   openSheet(html,{report:true});
 }
@@ -905,6 +998,9 @@ function handle(act,el){
     case 'negfrom':RB=null;citySheet(k);break;
     case 'tbuild':if(buildTerminal(me,k)){addNews(`Construction starts: ${stagesFor(k)[me.terms[k].stage].name} at ${CI[k].name}.`,'you');save();renderHeader();citySheet(k,1);}break;
     case 'color':if(G){G.color=k;save();}else UI.setupColor=k;render();break;
+    case 'meeting':meetingSheet();break;
+    case 'mtg':{const f=MTG&&MTG.acts[+k];if(f){const again=f();save();renderHeader();if(again)meetingSheet(1);}break;}
+    case 'rhub':UI.routeHub=k||null;render();break;
     case 'csort':UI.citySort=k;render();break;
     case 'fgroup':UI.fGroup=k;render();break;
     case 'fdir':UI.fDir=+k;render();break;
@@ -941,7 +1037,7 @@ function start(data){
     renderBuilder();});
   document.addEventListener('pointermove',chartHover);document.addEventListener('pointerdown',chartHover);
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&SHEET)closeSheet();});
-  window.claude?.hot?.snapshot?.(()=>({G,UI:{citySort:UI.citySort,tab:UI.tab,zoom:UI.zoom,setupHQ:UI.setupHQ,fGroup:UI.fGroup,fDir:UI.fDir,fShow:UI.fShow}}));
+  window.claude?.hot?.snapshot?.(()=>({G,UI:{routeHub:UI.routeHub,citySort:UI.citySort,tab:UI.tab,zoom:UI.zoom,setupHQ:UI.setupHQ,fGroup:UI.fGroup,fDir:UI.fDir,fShow:UI.fShow}}));
   render();
 }
 if(typeof document!=='undefined'){window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});}
